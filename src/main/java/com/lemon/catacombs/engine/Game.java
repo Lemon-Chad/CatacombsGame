@@ -9,11 +9,13 @@ import com.lemon.catacombs.engine.physics.Handler;
 import com.lemon.catacombs.objects.Block;
 import com.lemon.catacombs.objects.Enemy;
 import com.lemon.catacombs.objects.Player;
+import org.w3c.dom.css.Rect;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.util.Set;
@@ -32,6 +34,10 @@ public class Game extends Canvas implements Runnable {
     private final MouseInput mouseInput;
     private final Camera camera;
 
+    private final BufferedImageLoader loader;
+
+    private double delta = 0.0;
+
     public Player player;
 
     public Game() {
@@ -42,13 +48,21 @@ public class Game extends Canvas implements Runnable {
         addKeyListener(keyInput = new KeyInput());
         addMouseListener(mouseInput = new MouseInput());
 
-        BufferedImageLoader loader = new BufferedImageLoader();
+        loader = new BufferedImageLoader();
         BufferedImage level = loader.loadImage("/test_level.png");
         loadLevel(level);
 
         camera = new Camera(0, 0);
 
         start();
+    }
+
+    public static BufferedImage loadImage(String ref) {
+        return getInstance().loader.loadImage(ref);
+    }
+
+    public static double delta() {
+        return getInstance().delta / 1000;
     }
 
     private void start() {
@@ -73,7 +87,6 @@ public class Game extends Canvas implements Runnable {
             long lastTime = System.nanoTime();
             final double amountOfTicks = 60.0;
             final double ns = 1_000_000_000 / amountOfTicks;
-            double delta = 0;
             long timer = System.currentTimeMillis();
             long lastRender = System.currentTimeMillis();
             int frames = 0;
@@ -125,7 +138,7 @@ public class Game extends Canvas implements Runnable {
             try {
                 g = bs.getDrawGraphics();
 
-                g.setColor(Color.BLACK);
+                g.setColor(new Color(50, 50, 50));
                 g.fillRect(0, 0, getWidth(), getHeight());
 
                 Graphics2D g2d = (Graphics2D) g;
@@ -192,11 +205,11 @@ public class Game extends Canvas implements Runnable {
         getInstance().mouseInput.addEventHandler(event, handler);
     }
 
-    public static boolean isOccupied(Point location, Set<Integer> collisionMask) {
-        return getInstance().handler.blocked(location, collisionMask);
-    }
-
     public Handler getWorld() {
         return handler;
+    }
+
+    public Camera getCamera() {
+        return camera;
     }
 }

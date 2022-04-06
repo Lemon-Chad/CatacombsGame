@@ -1,6 +1,8 @@
 package com.lemon.catacombs.engine.pathing;
 
 import com.lemon.catacombs.engine.Game;
+import com.lemon.catacombs.engine.physics.GameObject;
+import org.w3c.dom.css.Rect;
 
 import java.awt.*;
 import java.util.HashSet;
@@ -21,17 +23,23 @@ public class Pathfinder {
         this.stepSize = stepSize;
     }
 
-    private List<Point> findPath(Point start) {
-        Set<Step> open = new HashSet<>();
+    private List<Point> findPath(GameObject pather, Rectangle start) {
+        start = new Rectangle(Math.floorDiv(start.x, stepSize) * stepSize, Math.floorDiv(start.y, stepSize) * stepSize, start.width, start.height);
+
+        List<Step> open = new LinkedList<>();
         List<Step> closed = new LinkedList<>();
 
-        double ID = Math.random();
-
-        open.add(new Step(start, null, 0, 0));
+        open.add(new Step(start.getLocation(), null, 0, 0));
         while (!open.isEmpty()) {
-            System.out.println(ID + " Open:" + open.size());
-            System.out.println(ID + " Closed:" + closed.size());
+            // get the next step with the lowest F cost
             Step current = open.iterator().next();
+            for (Step step : open) {
+                if (step.f() < current.f()) {
+                    current = step;
+                } else if (step.f() == current.f() && step.h < current.h) {
+                    current = step;
+                }
+            }
             open.remove(current);
             closed.add(current);
 
@@ -39,29 +47,37 @@ public class Pathfinder {
                 return current.path();
             }
 
-            for (int i = -1; i <= 1; i++) {
-                for (int j = -1; j <= 1; j++) {
-                    if (i == 0 && j == 0) {
-                        continue;
-                    }
-
-                    Point next = new Point(current.location.x + i * stepSize, current.location.y + j * stepSize);
-                    int g = current.g + 1;
-                    int h = Math.abs(next.x - goal.x) + Math.abs(next.y - goal.y);
-                    Step step = new Step(next, current, g, h);
-
-                    if (closed.contains(step) || Game.getInstance().getWorld().blocked(next, wallMask) || g > maxDepth) {
-                        continue;
-                    }
-
-                    open.add(step);
+            for (int i = 0; i < 4; i++) {
+                Point next = new Point(current.location);
+                switch (i) {
+                    case 0:
+                        next.x += stepSize;
+                        break;
+                    case 1:
+                        next.x -= stepSize;
+                        break;
+                    case 2:
+                        next.y += stepSize;
+                        break;
+                    case 3:
+                        next.y -= stepSize;
+                        break;
                 }
+                int g = current.g + stepSize;
+                int h = Math.abs(next.x - goal.x) + Math.abs(next.y - goal.y);
+                Step step = new Step(next, current, g, h);
+
+                if (open.contains(step) || closed.contains(step) || Game.getInstance().getWorld().blocked(pather, new Rectangle(next, start.getSize()), wallMask) || g > maxDepth * stepSize) {
+                    continue;
+                }
+
+                open.add(step);
             }
         }
         return null;
     }
 
-    public static List<Point> findPath(Point start, Point end, Set<Integer> wallMask, int maxDepth, int stepSize) {
-        return new Pathfinder(end, wallMask, maxDepth, stepSize).findPath(start);
+    public static List<Point> findPath(GameObject pather, Rectangle start, Point end, Set<Integer> wallMask, int maxDepth, int stepSize) {
+        return new Pathfinder(end, wallMask, maxDepth, stepSize).findPath(pather, start);
     }
 }

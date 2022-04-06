@@ -17,7 +17,6 @@ public class MouseInput extends MouseAdapter {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        System.out.println(Math.random());
         onEvent(MouseEvents.MouseClicked, e);
     }
 

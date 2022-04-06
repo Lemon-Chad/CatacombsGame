@@ -9,7 +9,7 @@ public class Handler {
     private final Map<Integer, CollisionLayer> collisionLayers = new HashMap<>();
 
     public void tick() {
-        for (GameObject object : objects) {
+        for (GameObject object : new HashSet<>(objects)) {
             object.tick();
         }
     }
@@ -19,17 +19,17 @@ public class Handler {
             for (int layer : object.getCollisionMask()) {
                 CollisionLayer collisionLayer = collisionLayers.computeIfAbsent(layer, CollisionLayer::new);
                 for (GameObject collisionObject : collisionLayer.getObjects())
-                    if (object.collidesWith(collisionObject)) {
+                    if (object != collisionObject && object.collidesWith(collisionObject)) {
                         object.collision(collisionObject);
                     }
             }
         }
     }
 
-    public boolean blocked(Point location, Set<Integer> collisionMask) {
+    public boolean blocked(GameObject origin, Rectangle location, Set<Integer> collisionMask) {
         for (int layer : collisionMask) {
             if (collisionLayers.computeIfAbsent(layer, CollisionLayer::new).getObjects().stream()
-                    .anyMatch(gameObject -> gameObject.getBounds().contains(location))) {
+                    .anyMatch(gameObject -> gameObject.getBounds().intersects(location) && gameObject != origin)) {
                 return true;
             }
         }
@@ -50,6 +50,9 @@ public class Handler {
 
     public void removeObject(GameObject object) {
         objects.remove(object);
+        for (CollisionLayer collisionLayer : collisionLayers.values()) {
+            collisionLayer.remove(object);
+        }
     }
 
     public Set<GameObject> getObjects() {

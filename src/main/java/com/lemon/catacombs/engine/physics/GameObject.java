@@ -1,7 +1,6 @@
 package com.lemon.catacombs.engine.physics;
 
 import com.lemon.catacombs.engine.Game;
-import com.lemon.catacombs.objects.ID;
 
 import java.awt.*;
 import java.util.Collections;
@@ -11,11 +10,11 @@ import java.util.Set;
 abstract public class GameObject {
     protected int x, y;
     protected float velX = 0, velY = 0;
-    protected final ID id;
+    protected final int id;
     private final Set<Integer> collisionLayer;
     private final Set<Integer> collisionMask;
 
-    public GameObject(int x, int y, ID id) {
+    public GameObject(int x, int y, int id) {
         this.x = x;
         this.y = y;
         this.id = id;
@@ -59,7 +58,7 @@ abstract public class GameObject {
         this.velY = velY;
     }
 
-    public ID getId() {
+    public int getId() {
         return id;
     }
 

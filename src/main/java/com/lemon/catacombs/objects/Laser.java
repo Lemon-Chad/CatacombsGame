@@ -8,6 +8,7 @@ public class Laser extends GameObject {
     public Laser(int x, int y) {
         super(x, y, ID.Laser);
         addCollisionMask(Layers.BLOCKS);
+        addCollisionMask(Layers.ENEMY);
         addCollisionLayer(Layers.PLAYER_PROJECTILES);
     }
 
@@ -30,6 +31,10 @@ public class Laser extends GameObject {
 
     @Override
     public void collision(GameObject other) {
+        if (other.getId() == ID.Enemy) {
+            Enemy enemy = (Enemy) other;
+            enemy.damage((int) (Math.random() * 3) + 1);
+        }
         destroy();
     }
 }

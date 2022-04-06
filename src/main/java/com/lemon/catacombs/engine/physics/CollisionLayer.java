@@ -1,5 +1,6 @@
 package com.lemon.catacombs.engine.physics;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,7 +18,7 @@ public class CollisionLayer {
     }
 
     public Set<GameObject> getObjects() {
-        return objects;
+        return new HashSet<>(objects);
     }
 
     public void add(GameObject object) {

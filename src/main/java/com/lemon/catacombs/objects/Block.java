@@ -1,13 +1,17 @@
 package com.lemon.catacombs.objects;
 
 import com.lemon.catacombs.engine.physics.GameObject;
+import com.lemon.catacombs.engine.render.Sprite;
 
 import java.awt.*;
 
 public class Block extends GameObject {
+    private final Sprite sprite;
+
     public Block(int x, int y) {
         super(x, y, ID.Block);
         addCollisionLayer(Layers.BLOCKS);
+        sprite = Sprite.LoadSprite("/sprites/tiles/stonebrick16set/" + ((int) (Math.random() * 3 + 1) - 1) + ".png");
     }
 
     @Override
@@ -17,8 +21,7 @@ public class Block extends GameObject {
 
     @Override
     public void render(Graphics g) {
-        g.setColor(Color.RED);
-        g.fillRect(x, y, 32, 32);
+        sprite.render(g, x, y, 32, 32);
     }
 
     @Override
