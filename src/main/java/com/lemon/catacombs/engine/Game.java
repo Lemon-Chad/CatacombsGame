@@ -4,6 +4,7 @@ import com.lemon.catacombs.engine.input.KeyInput;
 import com.lemon.catacombs.engine.input.MouseEvents;
 import com.lemon.catacombs.engine.input.MouseInput;
 import com.lemon.catacombs.engine.render.Camera;
+import com.lemon.catacombs.engine.render.TileSet;
 import com.lemon.catacombs.engine.render.Window;
 import com.lemon.catacombs.engine.physics.Handler;
 import com.lemon.catacombs.objects.Block;
@@ -18,6 +19,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
+import java.util.HashSet;
 import java.util.Set;
 
 public class Game extends Canvas implements Runnable {
@@ -159,6 +161,8 @@ public class Game extends Canvas implements Runnable {
         int w = image.getWidth();
         int h = image.getHeight();
 
+        TileSet dirt = TileSet.LoadTilemap("/sprites/tiles/DirtTileset.png", 32, 32, -100, new HashSet<>());
+
         bounds = new Rectangle(32 * w, 32 * h);
 
         for (int xx = 0; xx < w; xx++) {
@@ -173,6 +177,8 @@ public class Game extends Canvas implements Runnable {
                     handler.addObject(new Block(xx * 32, yy * 32));
                 } else if (red == 255 && green == 255 && blue == 0) {
                     handler.addObject(new Enemy(xx * 32, yy * 32));
+                } else if (red == 255 && green == 0 && blue == 255) {
+                    dirt.placeTile(xx * 32, yy * 32);
                 }
             }
         }
