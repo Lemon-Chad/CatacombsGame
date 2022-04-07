@@ -52,8 +52,10 @@ public class TileSet {
     private final int tileWidth;
     private final int tileHeight;
     private final Set<Integer> collisionLayer;
+    private final int id;
 
-    public TileSet(Sprite[] sprites, int tileWidth, int tileHeight, int z, Set<Integer> collisionLayer) {
+    public TileSet(Sprite[] sprites, int tileWidth, int tileHeight, int z, Set<Integer> collisionLayer, int id) {
+        this.id = id;
         this.sprites = sprites;
         this.tiles = new HashSet<>();
         this.tileLocations = new HashSet<>();
@@ -63,11 +65,11 @@ public class TileSet {
         this.collisionLayer = collisionLayer;
     }
 
-    private class Tile extends GameObject {
+    public class Tile extends GameObject {
         private Sprite tile;
 
         public Tile(int x, int y) {
-            super(x, y, -1);
+            super(x, y, TileSet.this.id);
             addCollisionLayers(collisionLayer);
             tiles.add(this);
             tileLocations.add(new Point(x, y));
@@ -136,7 +138,15 @@ public class TileSet {
         updateAll();
     }
 
-    public static TileSet LoadTilemap(String path, int width, int height, int z, Set<Integer> collisionLayer) {
+    public static TileSet LoadTilemap(int id, String path, int width, int height, int z, int[] collisionLayer) {
+        Set<Integer> collisionLayerSet = new HashSet<>();
+        for (int i : collisionLayer) {
+            collisionLayerSet.add(i);
+        }
+        return LoadTilemap(id, path, width, height, z, collisionLayerSet);
+    }
+
+    public static TileSet LoadTilemap(int id, String path, int width, int height, int z, Set<Integer> collisionLayer) {
         BufferedImage img = Game.loadImage(path);
         Sprite[] sprites = new Sprite[47];
         int tileWidth =  img.getWidth() / 11;
@@ -155,7 +165,7 @@ public class TileSet {
             }
         }
 
-        return new TileSet(sprites, width, height, z, collisionLayer);
+        return new TileSet(sprites, width, height, z, collisionLayer, id);
     }
 
 }

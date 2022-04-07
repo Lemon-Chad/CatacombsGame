@@ -10,6 +10,7 @@ import com.lemon.catacombs.engine.physics.Handler;
 import com.lemon.catacombs.objects.Block;
 import com.lemon.catacombs.objects.Enemy;
 import com.lemon.catacombs.objects.Player;
+import com.lemon.catacombs.objects.TileSets;
 import org.w3c.dom.css.Rect;
 
 import javax.swing.*;
@@ -161,8 +162,6 @@ public class Game extends Canvas implements Runnable {
         int w = image.getWidth();
         int h = image.getHeight();
 
-        TileSet dirt = TileSet.LoadTilemap("/sprites/tiles/DirtTileset.png", 32, 32, -100, new HashSet<>());
-
         bounds = new Rectangle(32 * w, 32 * h);
 
         for (int xx = 0; xx < w; xx++) {
@@ -174,11 +173,9 @@ public class Game extends Canvas implements Runnable {
                 if (red == 0 && green == 0 && blue == 255) {
                     handler.addObject(new Player(xx * 32, yy * 32));
                 } else if (red == 255 && green == 0 && blue == 0) {
-                    handler.addObject(new Block(xx * 32, yy * 32));
+                    TileSets.StoneBrick.placeTile(xx * 32, yy * 32);
                 } else if (red == 255 && green == 255 && blue == 0) {
                     handler.addObject(new Enemy(xx * 32, yy * 32));
-                } else if (red == 255 && green == 0 && blue == 255) {
-                    dirt.placeTile(xx * 32, yy * 32);
                 }
             }
         }
