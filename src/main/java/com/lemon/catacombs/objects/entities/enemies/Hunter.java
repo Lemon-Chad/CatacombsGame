@@ -62,9 +62,8 @@ public class Hunter extends Enemy {
 
             Game.getInstance().getWorld().addObject(bullet);
         }
-        AudioHandler.Sound sound = Game.getInstance().getAudioHandler().sound("/sounds/shotgun/fire" + (int) (1 + Math.random() * 2) + ".wav");
+        AudioHandler.Sound sound = Game.getInstance().getAudioHandler().playSound("/sounds/shotgun/fire" + (int) (1 + Math.random() * 2) + ".wav");
         sound.setVolume(0.25f);
-        sound.play();
     }
 
     @Override

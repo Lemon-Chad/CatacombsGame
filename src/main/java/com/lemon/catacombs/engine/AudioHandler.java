@@ -85,6 +85,11 @@ public class AudioHandler {
     public Sound playSound(String sound) {
         Sound s = sound(sound);
         s.play();
+        s.getClip().addLineListener(e -> {
+            if (LineEvent.Type.STOP.equals(e.getType())) {
+                s.close();
+            } 
+        });
         return s;
     }
 }

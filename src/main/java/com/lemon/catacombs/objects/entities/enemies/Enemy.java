@@ -157,9 +157,8 @@ public abstract class Enemy extends PathingObject {
         bullet.setDamage(damage);
 
         Game.getInstance().getWorld().addObject(bullet);
-        AudioHandler.Sound sound = Game.getInstance().getAudioHandler().sound("/sounds/pistol/fire" + (int) (1 + Math.random() * 2) + ".wav");
+        AudioHandler.Sound sound = Game.getInstance().getAudioHandler().playSound("/sounds/pistol/fire" + (int) (1 + Math.random() * 2) + ".wav");
         sound.setVolume(0.25f);
-        sound.play();
     }
 
     @Override
