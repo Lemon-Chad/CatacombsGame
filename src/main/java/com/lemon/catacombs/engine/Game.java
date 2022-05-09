@@ -56,6 +56,8 @@ public class Game extends Canvas implements Runnable {
 
         loader = new BufferedImageLoader();
         audioHandler = new AudioHandler();
+        audioHandler.playSound("/sounds/item.wav").setVolume(0f);
+        loader.loadImage("/sprites/guns/pistol.png");
 
         menu();
 

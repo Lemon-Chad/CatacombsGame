@@ -72,7 +72,7 @@ public class ThrownWeapon extends GameObject {
         if (other.getId() == ID.Enemy) {
             Enemy enemy = (Enemy) other;
             enemy.cancelLoot();
-            enemy.damage(999999, this);
+            enemy.damage(enemy.getHealth(), this);
             Utils.bloodsplosion(x, y, enemy.getMaxHealth() * 10, 1, 10);
         }
         destroy();

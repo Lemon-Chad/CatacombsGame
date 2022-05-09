@@ -30,10 +30,10 @@ public class PlayerHUD extends UIComponent {
     public void render(Graphics g) {
         g.setFont(new Font("Arial", Font.BOLD, 30));
         g.setColor(Color.WHITE);
-        int width = g.getFontMetrics().stringWidth(kills + " kills");
-        g.drawString(kills + " kills", Game.getInstance().getWidth() - width - 10, 30);
-        width = g.getFontMetrics().stringWidth(damage + " damage");
-        g.drawString(damage + " damage", Game.getInstance().getWidth() - width - 10, 60);
+        int width = g.getFontMetrics().stringWidth(shorten(kills) + " kills");
+        g.drawString(shorten(kills) + " kills", Game.getInstance().getWidth() - width - 10, 30);
+        width = g.getFontMetrics().stringWidth(shorten(damage) + " damage");
+        g.drawString(shorten(damage) + " damage", Game.getInstance().getWidth() - width - 10, 60);
 
         if (Game.getInstance().getPlayer() == null) {
             return;
@@ -41,6 +41,17 @@ public class PlayerHUD extends UIComponent {
         renderHealthBar(g);
         renderStaminaBar(g);
         renderInventory(g);
+    }
+
+    private String shorten(int number) {
+        if (number < 1000) {
+            return number + "";
+        } else if (number < 1000000) {
+            return Math.round(number / 10f) / 100 + "k";
+        } else if (number < 1000000000) {
+            return Math.round(number / 10_000f) / 100 + "m";
+        }
+        return Math.round(number / 10_000_000f) / 100 + "b";
     }
 
     private void renderInventory(Graphics g) {
