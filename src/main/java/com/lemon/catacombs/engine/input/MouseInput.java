@@ -65,4 +65,8 @@ public class MouseInput extends MouseAdapter {
             handler.onEvent(e);
         }
     }
+
+    public void clear() {
+        eventHandlers.clear();
+    }
 }

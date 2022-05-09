@@ -2,29 +2,32 @@ package com.lemon.catacombs.engine.pathing;
 
 import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.physics.GameObject;
-import org.w3c.dom.css.Rect;
 
 import java.awt.*;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
+import java.util.*;
 import java.util.List;
 
 public class Pathfinder {
     private final Point goal;
     private final Set<Integer> wallMask;
+    private final Map<Integer, Integer> costs;
     private final int maxDepth;
     private final int stepSize;
 
-    private Pathfinder(Point goal, Set<Integer> wallMask, int maxDepth, int stepSize) {
+    private Pathfinder(Point goal, Set<Integer> wallMask, Map<Integer, Integer> costs, int maxDepth, int stepSize) {
         this.goal = goal;
         this.wallMask = wallMask;
+        this.costs = costs;
         this.maxDepth = maxDepth;
         this.stepSize = stepSize;
     }
 
     private List<Point> findPath(GameObject pather, Rectangle start) {
-        start = new Rectangle(Math.floorDiv(start.x, stepSize) * stepSize, Math.floorDiv(start.y, stepSize) * stepSize, start.width, start.height);
+        if (blocked(pather, new Rectangle((int) goal.getX(), (int) goal.getY(), stepSize, stepSize), wallMask)) {
+            return null;
+        }
+
+        start = new Rectangle((int) Math.floor((float) start.x / stepSize) * stepSize, (int) Math.floor((float) start.y / stepSize) * stepSize, start.width, start.height);
 
         List<Step> open = new LinkedList<>();
         List<Step> closed = new LinkedList<>();
@@ -32,7 +35,7 @@ public class Pathfinder {
         open.add(new Step(start.getLocation(), null, 0, 0));
         while (!open.isEmpty()) {
             // get the next step with the lowest F cost
-            Step current = open.iterator().next();
+            Step current = open.get(0);
             for (Step step : open) {
                 if (step.f() < current.f()) {
                     current = step;
@@ -47,27 +50,19 @@ public class Pathfinder {
                 return current.path();
             }
 
-            for (int i = 0; i < 4; i++) {
+            for (int x = -1; x <= 1; x++) for (int y = -1; y <= 1; y++) {
+                if (x == 0 && y == 0) continue;
                 Point next = new Point(current.location);
-                switch (i) {
-                    case 0:
-                        next.x += stepSize;
-                        break;
-                    case 1:
-                        next.x -= stepSize;
-                        break;
-                    case 2:
-                        next.y += stepSize;
-                        break;
-                    case 3:
-                        next.y -= stepSize;
-                        break;
-                }
+                next.translate(x * stepSize, y * stepSize);
                 int g = current.g + stepSize;
-                int h = Math.abs(next.x - goal.x) + Math.abs(next.y - goal.y);
+                int h = Math.abs(next.x - goal.x) + Math.abs(next.y - goal.y) + costOf(pather, current, start, x, y);
                 Step step = new Step(next, current, g, h);
 
-                if (open.contains(step) || closed.contains(step) || Game.getInstance().getWorld().blocked(pather, new Rectangle(next, start.getSize()), wallMask) || g > maxDepth * stepSize) {
+                if (open.contains(step) || closed.contains(step) || g > maxDepth * stepSize) {
+                    continue;
+                }
+
+                if (diagonalBlock(pather, current, start, x, y, wallMask)) {
                     continue;
                 }
 
@@ -77,7 +72,28 @@ public class Pathfinder {
         return null;
     }
 
-    public static List<Point> findPath(GameObject pather, Rectangle start, Point end, Set<Integer> wallMask, int maxDepth, int stepSize) {
-        return new Pathfinder(end, wallMask, maxDepth, stepSize).findPath(pather, start);
+    private boolean diagonalBlock(GameObject pather, Step current, Rectangle start, int x, int y, Set<Integer> mask) {
+        return blocked(pather, new Rectangle(new Point(current.location.x, current.location.y + y * stepSize), start.getSize()), mask) ||
+                blocked(pather, new Rectangle(new Point(current.location.x + x * stepSize, current.location.y), start.getSize()), mask) ||
+                blocked(pather, new Rectangle(new Point(current.location.x + x * stepSize, current.location.y + y * stepSize), start.getSize()), mask);
+    }
+
+    private int costOf(GameObject pather, Step current, Rectangle start, int x, int y) {
+        int cost = 0;
+        for (int layer : costs.keySet()) {
+            Set<Integer> mask = Set.of(layer);
+            if (diagonalBlock(pather, current, start, x, y, mask)) {
+                cost += costs.get(layer);
+            }
+        }
+        return cost;
+    }
+
+    private boolean blocked(GameObject pather, Rectangle start, Set<Integer> mask) {
+        return Game.getInstance().getWorld().blocked(pather, start, mask);
+    }
+
+    public static List<Point> findPath(GameObject pather, Rectangle start, Point end, Set<Integer> wallMask, Map<Integer, Integer> costs, int maxDepth, int stepSize) {
+        return new Pathfinder(end, wallMask, costs, maxDepth, stepSize).findPath(pather, start);
     }
 }

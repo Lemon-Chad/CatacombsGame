@@ -93,8 +93,6 @@ public class TileSet {
 
             int key = downRight | (down << 1) | (downLeft << 2) | (right << 3) | (left << 4) | (upRight << 5) | (up << 6) | (upLeft << 7);
 
-            System.out.println("start");
-
             int c = 34;
             for (int i = 0; i < patterns.length; i++) {
                 if (patterns[i].match(key) && patterns[i].complexity() > patterns[c].complexity()) {
@@ -102,8 +100,6 @@ public class TileSet {
                 }
             }
             tile = sprites[c];
-
-            System.out.println("end");
         }
 
         @Override
@@ -151,7 +147,6 @@ public class TileSet {
         Sprite[] sprites = new Sprite[47];
         int tileWidth =  img.getWidth() / 11;
         int tileHeight = img.getHeight() / 5;
-        System.out.println(tileWidth + " " + tileHeight);
 
         int i = 0;
         for (int y = 0; y < 5; y++) {

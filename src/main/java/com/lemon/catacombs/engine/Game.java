@@ -4,24 +4,26 @@ import com.lemon.catacombs.engine.input.KeyInput;
 import com.lemon.catacombs.engine.input.MouseEvents;
 import com.lemon.catacombs.engine.input.MouseInput;
 import com.lemon.catacombs.engine.render.Camera;
-import com.lemon.catacombs.engine.render.TileSet;
 import com.lemon.catacombs.engine.render.Window;
-import com.lemon.catacombs.engine.physics.Handler;
+import com.lemon.catacombs.items.MachinePistol;
+import com.lemon.catacombs.items.Pistols;
+import com.lemon.catacombs.items.Revolver;
+import com.lemon.catacombs.items.Weapon;
 import com.lemon.catacombs.objects.Block;
-import com.lemon.catacombs.objects.Enemy;
-import com.lemon.catacombs.objects.Player;
-import com.lemon.catacombs.objects.TileSets;
-import org.w3c.dom.css.Rect;
+import com.lemon.catacombs.objects.endless.CheckeredBackground;
+import com.lemon.catacombs.objects.endless.InfinitySpawner;
+import com.lemon.catacombs.objects.entities.enemies.Vessel;
+import com.lemon.catacombs.objects.entities.Player;
+import com.lemon.catacombs.objects.ui.FadeIn;
+import com.lemon.catacombs.ui.MenuUI;
+import com.lemon.catacombs.ui.PlayerHUD;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
-import java.util.HashSet;
-import java.util.Set;
 
 public class Game extends Canvas implements Runnable {
     private static final long serialVersionUID = 1L;
@@ -38,10 +40,11 @@ public class Game extends Canvas implements Runnable {
     private final Camera camera;
 
     private final BufferedImageLoader loader;
+    private final AudioHandler audioHandler;
 
     private double delta = 0.0;
 
-    public Player player;
+    private Player player;
 
     public Game() {
         instance = this;
@@ -52,12 +55,61 @@ public class Game extends Canvas implements Runnable {
         addMouseListener(mouseInput = new MouseInput());
 
         loader = new BufferedImageLoader();
-        BufferedImage level = loader.loadImage("/test_level.png");
-        loadLevel(level);
+        audioHandler = new AudioHandler();
+
+        menu();
 
         camera = new Camera(0, 0);
 
         start();
+    }
+
+    public static AudioHandler.Sound playSound(String s) {
+        return getInstance().audioHandler.playSound(s);
+    }
+
+    public void reset() {
+        handler.clear();
+        keyInput.clear();
+        mouseInput.clear();
+        PlayerHUD.kills = 0;
+        PlayerHUD.damage = 0;
+    }
+
+    public void menu() {
+        reset();
+        handler.addObject(new FadeIn(30));
+        handler.addObject(new CheckeredBackground());
+        handler.addObject(new MenuUI());
+    }
+
+    public void ui() {
+        handler.addObject(new PlayerHUD(400, 30, 300, 15, 64));
+    }
+
+    public void endlessMode() {
+        reset();
+        ui();
+        handler.addObject(new Player(0, 0));
+        handler.addObject(new CheckeredBackground());
+        handler.addObject(new InfinitySpawner());
+        handler.addObject(Weapon.dropWeapon(Weapon.generateWeapon(), 0, 64));
+        camera.setShake(3.0f);
+        camera.setShakeDecayRate(0.99f);
+        camera.setZoom(2.0f);
+        camera.setZoomDecayRate(0.99f);
+        Timer timer = new Timer(1000 / 60, e -> {
+            camera.setShakeDecayRate(0.9f);
+            camera.setZoomDecayRate(0.9f);
+        });
+        timer.setRepeats(false);
+        timer.start();
+    }
+
+    public void testLevel() {
+        BufferedImage level = loader.loadImage("/test_level.png");
+        loadLevel(level);
+        bounds = null;
     }
 
     public static BufferedImage loadImage(String ref) {
@@ -114,6 +166,7 @@ public class Game extends Canvas implements Runnable {
 
                 if (System.currentTimeMillis() - timer > 1_000) {
                     timer += 1_000;
+                    System.out.println("FPS: " + frames);
                     frames = 0;
                 }
             }
@@ -138,22 +191,48 @@ public class Game extends Canvas implements Runnable {
 
         Graphics g = null;
         do {
+            BufferedImage screen = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
             try {
-                g = bs.getDrawGraphics();
+                g = screen.getGraphics();
 
                 g.setColor(new Color(50, 50, 50));
                 g.fillRect(0, 0, getWidth(), getHeight());
 
                 Graphics2D g2d = (Graphics2D) g;
+                double offsetX = getWidth() * (1 - camera.getZoom()) / 2;
+                double offsetY = getHeight() * (1 - camera.getZoom()) / 2;
+                g2d.scale(camera.getZoom(), camera.getZoom());
+                g2d.translate(offsetX / camera.getZoom(), offsetY / camera.getZoom());
                 g2d.translate(-camera.getX(), -camera.getY());
 
                 handler.render(g);
 
                 g2d.translate(camera.getX(), camera.getY());
+                g2d.translate(-offsetX / camera.getZoom(), -offsetY / camera.getZoom());
+                g2d.scale(1 / camera.getZoom(), 1 / camera.getZoom());
+
+                handler.renderUI(g);
+
+                camera.decayZoom();
+                camera.decayShake();
             } finally {
                 assert g != null;
                 g.dispose();
             }
+
+            try {
+                g = bs.getDrawGraphics();
+
+                BufferedImage shader = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+                Graphics2D g2d = (Graphics2D) shader.getGraphics();
+                g2d.drawImage(screen, 0, 0, null);
+
+                g.drawImage(shader, 0, 0, null);
+            } finally {
+                assert g != null;
+                g.dispose();
+            }
+
             bs.show();
         } while (bs.contentsLost());
     }
@@ -173,9 +252,9 @@ public class Game extends Canvas implements Runnable {
                 if (red == 0 && green == 0 && blue == 255) {
                     handler.addObject(new Player(xx * 32, yy * 32));
                 } else if (red == 255 && green == 0 && blue == 0) {
-                    TileSets.StoneBrick.placeTile(xx * 32, yy * 32);
+                    handler.addObject(new Block(xx * 32, yy * 32));
                 } else if (red == 255 && green == 255 && blue == 0) {
-                    handler.addObject(new Enemy(xx * 32, yy * 32));
+                    handler.addObject(new Vessel(xx * 32, yy * 32));
                 }
             }
         }
@@ -214,5 +293,17 @@ public class Game extends Canvas implements Runnable {
 
     public Camera getCamera() {
         return camera;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public AudioHandler getAudioHandler() {
+        return audioHandler;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
     }
 }

@@ -1,15 +1,16 @@
 package com.lemon.catacombs.engine.physics;
 
 import com.lemon.catacombs.engine.Game;
+import com.lemon.catacombs.engine.render.YSortable;
 
 import java.awt.*;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-abstract public class GameObject {
+abstract public class GameObject implements YSortable {
     protected int x, y;
-    protected float velX = 0, velY = 0;
+    private float velX = 0, velY = 0;
     protected final int id;
     private final Set<Integer> collisionLayer;
     private final Set<Integer> collisionMask;
@@ -102,7 +103,7 @@ abstract public class GameObject {
 
     protected void normalizeVelocity(float maxVel) {
         double magnitude = Math.sqrt(velX * velX + velY * velY);
-        if (magnitude < 1) {
+        if (magnitude < maxVel) {
             return;
         }
         velX = maxVel * (float) (velX / magnitude);
@@ -135,5 +136,18 @@ abstract public class GameObject {
 
     public int getYSort() {
         return y + getBounds().height / 2;
+    }
+
+    protected void addVelX(float velX) {
+        this.velX += velX;
+    }
+
+    protected void addVelY(float velY) {
+        this.velY += velY;
+    }
+
+    protected void addVel(float velX, float velY) {
+        this.velX += velX;
+        this.velY += velY;
     }
 }

@@ -34,4 +34,9 @@ public class KeyInput extends KeyAdapter {
     public void onKeyReleased(int key, EventHandler handler) {
         keyReleaseEvents.computeIfAbsent(key, k -> new HashSet<>()).add(handler);
     }
+
+    public void clear() {
+        keyPressEvents.clear();
+        keyReleaseEvents.clear();
+    }
 }
