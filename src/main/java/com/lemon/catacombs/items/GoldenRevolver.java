@@ -59,7 +59,7 @@ public class GoldenRevolver extends Gun {
 
     @Override
     public boolean isLever() {
-        return true;
+        return false;
     }
 
     @Override
