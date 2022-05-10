@@ -9,6 +9,7 @@ import com.lemon.catacombs.items.*;
 import com.lemon.catacombs.objects.Block;
 import com.lemon.catacombs.objects.endless.CheckeredBackground;
 import com.lemon.catacombs.objects.endless.InfinitySpawner;
+import com.lemon.catacombs.objects.entities.enemies.Goliath;
 import com.lemon.catacombs.objects.entities.enemies.Vessel;
 import com.lemon.catacombs.objects.entities.Player;
 import com.lemon.catacombs.objects.ui.FadeIn;
@@ -60,6 +61,7 @@ public class Game extends Canvas implements Runnable {
         loader.loadImage("/sprites/guns/pistol.png");
 
         menu();
+//        bossFight();
 
         camera = new Camera(0, 0);
 
@@ -112,6 +114,20 @@ public class Game extends Canvas implements Runnable {
             camera.setShakeDecayRate(0.9f);
             camera.setZoomDecayRate(0.9f);
         });
+    }
+
+    private void bossFight() {
+        reset();
+        ui();
+        handler.addObject(new Player(0, 0));
+        handler.addObject(new CheckeredBackground());
+        handler.addObject(new Goliath(0, 500));
+        weaponSpawn();
+    }
+
+    private void weaponSpawn() {
+        handler.addObject(Weapon.dropWeapon(Weapon.generateWeapon(), 0, 64));
+        Game.later(10_000, this::weaponSpawn);
     }
 
     public void testLevel() {

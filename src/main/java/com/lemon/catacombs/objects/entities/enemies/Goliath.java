@@ -36,6 +36,13 @@ public class Goliath extends Enemy {
     }
 
     @Override
+    protected void onDeath() {
+        cancelLoot();
+        super.onDeath();
+        dropLoot();
+    }
+
+    @Override
     protected void dropLoot() {
         Game.getInstance().getWorld().addObject(Weapon.dropWeapon(new GoldenRevolver(), x, y));
     }

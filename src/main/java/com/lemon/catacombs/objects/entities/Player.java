@@ -402,7 +402,7 @@ public class Player extends Damageable {
             super(x, y, ID.PlayerProjectile);
             addCollisionLayer(Layers.PLAYER_PROJECTILES);
             addCollisionMask(Layers.ENEMY);
-            damage = equipped.meleeDamage() == 0 ? 30 : equipped.meleeDamage();
+            damage = (equipped == null || equipped.meleeDamage() == 0) ? 30 : equipped.meleeDamage();
         }
 
         @Override

@@ -2,6 +2,7 @@ package com.lemon.catacombs.engine;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class DelayHandler {
     private final Set<Event> events = new HashSet<>();
@@ -29,6 +30,6 @@ public class DelayHandler {
     }
 
     public void tick(long delta) {
-        events.removeIf(event -> event.tick(delta));
+        events.removeAll(new HashSet<>(events).stream().filter(event -> event.tick(delta)).collect(Collectors.toSet()));
     }
 }
