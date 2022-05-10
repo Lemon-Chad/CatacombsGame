@@ -81,7 +81,8 @@ public class Pathfinder {
     private int costOf(GameObject pather, Step current, Rectangle start, int x, int y) {
         int cost = 0;
         for (int layer : costs.keySet()) {
-            Set<Integer> mask = Set.of(layer);
+            Set<Integer> mask = new HashSet<>();
+            mask.add(layer);
             if (diagonalBlock(pather, current, start, x, y, mask)) {
                 cost += costs.get(layer);
             }
