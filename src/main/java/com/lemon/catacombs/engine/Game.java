@@ -5,10 +5,7 @@ import com.lemon.catacombs.engine.input.MouseEvents;
 import com.lemon.catacombs.engine.input.MouseInput;
 import com.lemon.catacombs.engine.render.Camera;
 import com.lemon.catacombs.engine.render.Window;
-import com.lemon.catacombs.items.MachinePistol;
-import com.lemon.catacombs.items.Pistols;
-import com.lemon.catacombs.items.Revolver;
-import com.lemon.catacombs.items.Weapon;
+import com.lemon.catacombs.items.*;
 import com.lemon.catacombs.objects.Block;
 import com.lemon.catacombs.objects.endless.CheckeredBackground;
 import com.lemon.catacombs.objects.endless.InfinitySpawner;
@@ -41,6 +38,7 @@ public class Game extends Canvas implements Runnable {
 
     private final BufferedImageLoader loader;
     private final AudioHandler audioHandler;
+    private final DelayHandler delayHandler;
 
     private double delta = 0.0;
 
@@ -56,7 +54,9 @@ public class Game extends Canvas implements Runnable {
 
         loader = new BufferedImageLoader();
         audioHandler = new AudioHandler();
-        audioHandler.playSound("/sounds/item.wav").setVolume(0f);
+        delayHandler = new DelayHandler();
+
+        audioHandler.playSound("/sounds/item.wav", 0);
         loader.loadImage("/sprites/guns/pistol.png");
 
         menu();
@@ -66,8 +66,16 @@ public class Game extends Canvas implements Runnable {
         start();
     }
 
-    public static AudioHandler.Sound playSound(String s) {
+    public static int playSound(String s) {
         return getInstance().audioHandler.playSound(s);
+    }
+
+    public static int playSound(String s, float volume) {
+        return getInstance().audioHandler.playSound(s, volume);
+    }
+
+    public static int playSound(String s, float volume, boolean loop) {
+        return getInstance().audioHandler.playSound(s, volume, loop);
     }
 
     public void reset() {
@@ -100,12 +108,10 @@ public class Game extends Canvas implements Runnable {
         camera.setShakeDecayRate(0.99f);
         camera.setZoom(2.0f);
         camera.setZoomDecayRate(0.99f);
-        Timer timer = new Timer(1000 / 60, e -> {
+        Game.later(1000, () -> {
             camera.setShakeDecayRate(0.9f);
             camera.setZoomDecayRate(0.9f);
         });
-        timer.setRepeats(false);
-        timer.start();
     }
 
     public void testLevel() {
@@ -163,7 +169,9 @@ public class Game extends Canvas implements Runnable {
                     delta--;
                 }
                 render();
-                lastRender = System.currentTimeMillis();
+                now = System.currentTimeMillis();
+                delayHandler.tick(now - lastRender);
+                lastRender = now;
                 frames++;
 
                 if (System.currentTimeMillis() - timer > 1_000) {
@@ -179,6 +187,8 @@ public class Game extends Canvas implements Runnable {
     }
 
     public void tick() {
+        keyInput.tick();
+        mouseInput.tick();
         handler.tick();
         handler.collisions();
         camera.tick(player);
@@ -307,5 +317,9 @@ public class Game extends Canvas implements Runnable {
 
     public void setPlayer(Player player) {
         this.player = player;
+    }
+
+    public static void later(long delay, Runnable runnable) {
+        getInstance().delayHandler.add(delay, runnable);
     }
 }

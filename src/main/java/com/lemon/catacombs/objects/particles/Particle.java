@@ -19,6 +19,10 @@ abstract public class Particle extends GameObject {
         return Math.round((1 - Math.min(Math.max(0, (life - decay) / (float) decay), 1)) * 255);
     }
 
+    protected double getFade() {
+        return 1 - Math.min(Math.max(0, (life - decay) / (float) decay), 1);
+    }
+
     @Override
     public void tick() {
         setVelX((float) Utils.approachZero(getVelX(), friction));

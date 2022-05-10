@@ -1,5 +1,6 @@
 package com.lemon.catacombs.objects.entities;
 
+import com.lemon.catacombs.Utils;
 import com.lemon.catacombs.engine.physics.GameObject;
 import com.lemon.catacombs.engine.physics.PhysicsObject;
 
@@ -54,12 +55,14 @@ abstract public class Damageable extends PhysicsObject {
             onDeath();
         }
         invincible();
+        Utils.bloodsplosion(x, y, damage, 1, 5);
     }
 
     public void damage(int damage, GameObject source) {
         if (invincibility > 0) {
             return;
         }
+        damage = Math.min(damage, health);
         damage(damage);
         double launchAngle = Math.atan2(this.y + 16 - source.getY(), this.x + 16 - source.getX());
         addFVel((float) Math.cos(launchAngle) * 3, (float) Math.sin(launchAngle) * 3);

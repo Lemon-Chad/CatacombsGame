@@ -27,6 +27,7 @@ public class EnvironmentBullet extends Bullet {
 
     @Override
     public void collision(GameObject other) {
+        super.collision(other);
         if (other instanceof Damageable) {
             Damageable damageable = (Damageable) other;
             damageable.damage(getDamage(), this);

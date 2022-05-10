@@ -3,6 +3,7 @@ package com.lemon.catacombs.items;
 import com.lemon.catacombs.Utils;
 import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.render.Sprite;
+import com.lemon.catacombs.engine.render.Spriteable;
 import com.lemon.catacombs.objects.entities.Player;
 
 import javax.swing.*;
@@ -76,15 +77,11 @@ public abstract class Gun implements Weapon {
         onShoot(player);
         Game.playSound(audioPath() + "fire" + (int) Utils.range(1, 3) + ".wav");
         if (isDual()) {
-            Timer timer = new Timer(60, e -> Game.playSound(audioPath() + "fire" + (int) Utils.range(1, 3) + ".wav"));
-            timer.setRepeats(false);
-            timer.start();
+            Game.later(60, () -> Game.playSound(audioPath() + "fire" + (int) Utils.range(1, 3) + ".wav"));
         }
         if (isLever()) {
             // Play sound after delay
-            Timer timer = new Timer(40, e -> Game.playSound(audioPath() + "lever" + (int) Utils.range(1, 3) + ".wav"));
-            timer.setRepeats(false);
-            timer.start();
+            Game.later(40, () -> Game.playSound(audioPath() + "lever" + (int) Utils.range(1, 3) + ".wav"));
         }
         cooldown = fireRate;
         currentRecoil += recoil;
@@ -96,8 +93,18 @@ public abstract class Gun implements Weapon {
     @Override
     public abstract Sprite getSprite();
 
+    @Override
+    public int meleeDamage() {
+        return 0;
+    }
+
     public int getFireRate() {
         return fireRate;
+    }
+
+    @Override
+    public Spriteable getSpriteable() {
+        return getSprite();
     }
 
     public boolean canFire() {

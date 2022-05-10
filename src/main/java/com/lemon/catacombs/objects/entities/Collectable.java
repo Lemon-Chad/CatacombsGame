@@ -3,7 +3,9 @@ package com.lemon.catacombs.objects.entities;
 import com.lemon.catacombs.Utils;
 import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.physics.GameObject;
+import com.lemon.catacombs.engine.render.Animation;
 import com.lemon.catacombs.engine.render.Sprite;
+import com.lemon.catacombs.engine.render.Spriteable;
 import com.lemon.catacombs.objects.ID;
 import com.lemon.catacombs.objects.Layers;
 import com.lemon.catacombs.objects.particles.Particle;
@@ -13,7 +15,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class Collectable extends GameObject {
-    private final Sprite sprite;
+    private final Spriteable sprite;
     private final int width;
     private final int height;
     private final float initialScale;
@@ -23,11 +25,11 @@ public class Collectable extends GameObject {
     private final CollectableListener listener;
     private final boolean onInteract;
 
-    public Collectable(Sprite sprite, int x, int y, float scale, int life, boolean onInteract, CollectableListener listener) {
+    public Collectable(Spriteable sprite, int x, int y, float scale, int life, boolean onInteract, CollectableListener listener) {
         super(x, y, ID.Collectable);
         this.sprite = sprite;
-        this.width = sprite.getImage().getWidth();
-        this.height = sprite.getImage().getHeight();
+        this.width = sprite.getSprite().getImage().getWidth();
+        this.height = sprite.getSprite().getImage().getHeight();
         this.initialScale = scale;
         this.scale = scale;
         this.life = life;
@@ -61,7 +63,7 @@ public class Collectable extends GameObject {
                 (int) (height * scale), BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = newImage.createGraphics();
         g2d.setComposite(ac);
-        g2d.drawImage(sprite.getImage(), 0, 0, (int) (width * scale), (int) (height * scale), null);
+        g2d.drawImage(sprite.getSprite().getImage(), 0, 0, (int) (width * scale), (int) (height * scale), null);
         g2d.dispose();
 
         g.drawImage(newImage, (int) (x + (1 - scale) * width / 2), (int) (y + (1 - scale) * height / 2), null);

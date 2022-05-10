@@ -6,6 +6,7 @@ import com.lemon.catacombs.engine.render.Sprite;
 import com.lemon.catacombs.objects.entities.Player;
 
 public class Pistols extends Gun {
+    private static final Sprite sprite = Sprite.LoadSprite("/sprites/guns/pistol.png");
     /*
     * __PISTOLS__
     * - Medium damage
@@ -49,7 +50,7 @@ public class Pistols extends Gun {
 
     @Override
     public Sprite getSprite() {
-        return Sprite.LoadSprite("/sprites/guns/pistol.png");
+        return sprite;
     }
 
     @Override

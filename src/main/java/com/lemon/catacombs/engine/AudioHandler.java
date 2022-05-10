@@ -3,8 +3,13 @@ package com.lemon.catacombs.engine;
 import javax.sound.sampled.*;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AudioHandler {
+    private int loopCount = 0;
+    private final Map<Integer, Sound> loops = new HashMap<>();
+
     public static class Sound {
         private final String name;
         private final Clip clip;
@@ -82,14 +87,36 @@ public class AudioHandler {
         }
     }
 
-    public Sound playSound(String sound) {
-        Sound s = sound(sound);
-        s.play();
-        s.getClip().addLineListener(e -> {
-            if (LineEvent.Type.STOP.equals(e.getType())) {
-                s.close();
-            } 
-        });
-        return s;
+    public int playSound(String sound, float volume, boolean loop) {
+        int id = loopCount++;
+        new Thread(() -> {
+            Sound s = sound(sound);
+            s.setVolume(volume);
+            if (loop) {
+                s.loop();
+                loops.put(id, s);
+            }
+            s.play();
+            s.getClip().addLineListener(e -> {
+                if (LineEvent.Type.STOP.equals(e.getType())) {
+                    s.close();
+                }
+            });
+        }).start();
+        return id;
+    }
+
+    public int playSound(String sound, float volume) {
+        return playSound(sound, volume, false);
+    }
+
+    public int playSound(String sound) {
+        return playSound(sound, 1f);
+    }
+
+    public void stopSound(int id) {
+        if (loops.containsKey(id)) {
+            loops.remove(id).stop();
+        }
     }
 }

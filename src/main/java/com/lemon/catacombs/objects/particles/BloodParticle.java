@@ -9,7 +9,7 @@ public class BloodParticle extends Particle {
     private final int size;
 
     public BloodParticle(int x, int y, int size) {
-        super(x, y, 0.1f, 45);
+        super(x, y, 0.1f, 30);
         this.size = size * 4;
         redShade = (int) (150 + Math.round(Math.random() * 105));
     }

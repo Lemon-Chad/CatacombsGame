@@ -29,7 +29,7 @@ public class Stalker extends Enemy {
 
     @Override
     public void tick() {
-        super.tick();
+        super.tick(16, 64);
         Player player = Game.getInstance().getPlayer();
         if (player != null) {
             if (getState() == State.CHASE && cooldown <= 0) {

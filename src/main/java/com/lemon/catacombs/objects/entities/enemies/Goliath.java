@@ -1,6 +1,8 @@
 package com.lemon.catacombs.objects.entities.enemies;
 
 import com.lemon.catacombs.engine.Game;
+import com.lemon.catacombs.items.GoldenRevolver;
+import com.lemon.catacombs.items.Weapon;
 import com.lemon.catacombs.objects.entities.Player;
 import com.lemon.catacombs.objects.projectiles.Bullet;
 import com.lemon.catacombs.objects.projectiles.EnemyBullet;
@@ -31,6 +33,11 @@ public class Goliath extends Enemy {
         } else {
             clearTarget();
         }
+    }
+
+    @Override
+    protected void dropLoot() {
+        Game.getInstance().getWorld().addObject(Weapon.dropWeapon(new GoldenRevolver(), x, y));
     }
 
     @Override

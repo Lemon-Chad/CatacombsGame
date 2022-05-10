@@ -2,6 +2,7 @@ package com.lemon.catacombs.engine.physics;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CollisionLayer {
     private final int id;
@@ -17,7 +18,7 @@ public class CollisionLayer {
     }
 
     public Set<GameObject> getObjects() {
-        return new HashSet<>(objects);
+        return objects;
     }
 
     public void add(GameObject object) {

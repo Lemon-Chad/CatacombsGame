@@ -5,7 +5,7 @@ import com.lemon.catacombs.engine.Game;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class Sprite {
+public class Sprite implements Spriteable {
     private final BufferedImage image;
 
     public Sprite(BufferedImage image) {
@@ -26,5 +26,10 @@ public class Sprite {
 
     public static Sprite LoadSprite(String path) {
         return new Sprite(Game.loadImage(path));
+    }
+
+    @Override
+    public Sprite getSprite() {
+        return this;
     }
 }

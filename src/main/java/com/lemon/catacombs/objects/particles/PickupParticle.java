@@ -7,7 +7,7 @@ import java.awt.*;
 
 public class PickupParticle extends Particle {
     private double angle;
-    private int size;
+    private final int size;
 
     public PickupParticle(int x, int y) {
         super(x, y, 0.1f, 10);

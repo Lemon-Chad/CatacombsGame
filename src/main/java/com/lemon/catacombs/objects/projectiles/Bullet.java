@@ -1,12 +1,26 @@
 package com.lemon.catacombs.objects.projectiles;
 
+import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.physics.GameObject;
 import com.lemon.catacombs.objects.Layers;
+import com.lemon.catacombs.objects.entities.Player;
 
 import java.awt.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public abstract class Bullet extends GameObject {
+    private final Set<BulletEffects> effects = new HashSet<>();
+    private final Set<ImpactEffect> impactEffects = new HashSet<>();
     private int damage;
+
+    public interface BulletEffects {
+        void apply(Bullet bullet);
+    }
+
+    public interface ImpactEffect {
+        void apply(Bullet bullet, GameObject target);
+    }
 
     public Bullet(int x, int y, int id) {
         super(x, y, id);
@@ -28,6 +42,26 @@ public abstract class Bullet extends GameObject {
         if (getVelY() < 0.1 && getVelY() > -0.1) {
             destroy();
         }
+
+        Player player = Game.getInstance().getPlayer();
+        if (player != null) {
+            if (Point.distance(x, y, player.getX(), player.getY()) > 2_000) {
+                // Despawn
+                destroy();
+            }
+        }
+
+        for (BulletEffects effect : effects) {
+            effect.apply(this);
+        }
+    }
+
+    public void addEffect(BulletEffects effect) {
+        effects.add(effect);
+    }
+
+    public void addImpactEffect(ImpactEffect effect) {
+        impactEffects.add(effect);
     }
 
     abstract Color getColor();
@@ -49,7 +83,9 @@ public abstract class Bullet extends GameObject {
 
     @Override
     public void collision(GameObject other) {
-        destroy();
+        for (ImpactEffect effect : impactEffects) {
+            effect.apply(this, other);
+        }
     }
 
     public void setDamage(int damage) {

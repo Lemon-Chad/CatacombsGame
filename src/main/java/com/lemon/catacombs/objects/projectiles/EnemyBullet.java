@@ -28,6 +28,7 @@ public class EnemyBullet extends Bullet {
 
     @Override
     public void collision(GameObject other) {
+        super.collision(other);
         if (other.getId() == ID.Player) {
             Player player = (Player) other;
             player.damage(getDamage(), this);

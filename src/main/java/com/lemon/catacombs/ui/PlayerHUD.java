@@ -47,11 +47,11 @@ public class PlayerHUD extends UIComponent {
         if (number < 1000) {
             return number + "";
         } else if (number < 1000000) {
-            return Math.round(number / 10f) / 100 + "k";
+            return Math.round(number / 10f) / 100f + "k";
         } else if (number < 1000000000) {
-            return Math.round(number / 10_000f) / 100 + "m";
+            return Math.round(number / 10_000f) / 100f + "m";
         }
-        return Math.round(number / 10_000_000f) / 100 + "b";
+        return Math.round(number / 10_000_000f) / 100f + "b";
     }
 
     private void renderInventory(Graphics g) {

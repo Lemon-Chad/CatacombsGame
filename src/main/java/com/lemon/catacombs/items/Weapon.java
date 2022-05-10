@@ -2,6 +2,7 @@ package com.lemon.catacombs.items;
 
 import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.render.Sprite;
+import com.lemon.catacombs.engine.render.Spriteable;
 import com.lemon.catacombs.objects.entities.Collectable;
 import com.lemon.catacombs.objects.entities.Player;
 
@@ -51,7 +52,7 @@ public interface Weapon {
 
     static Collectable dropWeapon(Weapon weapon, int x, int y) {
         return new Collectable(
-                weapon.getSprite(),
+                weapon.getSpriteable(),
                 x, y, 1.5f,1_000, true,
                 (player, collectable) -> {
                     player.addWeapon(weapon);
@@ -63,6 +64,8 @@ public interface Weapon {
     double getBloom();
     double getRecoil();
     double getLeverTurn();
+
+    int meleeDamage();
 
     boolean isDual();
     boolean isLever();
@@ -79,6 +82,8 @@ public interface Weapon {
 
     void startFire();
     void stopFire();
+
+    Spriteable getSpriteable();
 
     boolean canFire();
 }

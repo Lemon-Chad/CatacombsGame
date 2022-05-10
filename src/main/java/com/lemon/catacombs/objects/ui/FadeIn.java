@@ -31,7 +31,7 @@ public class FadeIn extends UIComponent {
 
     @Override
     public void render(Graphics g) {
-        g.setColor(new Color(0, 0, 0, (int) (Math.min(1, (float) life / duration) * 255)));
+        g.setColor(new Color(0, 0, 0, (int) (Math.max(0, Math.min(1, (float) life / duration) * 255))));
         g.fillRect(0, 0, Game.getInstance().getWidth(), Game.getInstance().getHeight());
     }
 }

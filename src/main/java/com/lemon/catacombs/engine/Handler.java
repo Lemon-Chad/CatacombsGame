@@ -9,22 +9,40 @@ import com.lemon.catacombs.objects.entities.Player;
 
 import java.awt.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Handler {
     private final Set<GameObject> objects = new HashSet<>();
+    private final Set<GameObject> objectsToRemove = new HashSet<>();
+    private final Set<GameObject> objectsToAdd = new HashSet<>();
     private final Set<UIComponent> uiObjects = new HashSet<>();
+    private final Set<UIComponent> uiObjectsToRemove = new HashSet<>();
+    private final Set<UIComponent> uiObjectsToAdd = new HashSet<>();
     private final Map<Integer, CollisionLayer> collisionLayers = new HashMap<>();
 
     private static final int quadTreeRadius = 20;
 
     public void tick() {
-        QuadTree.clear();
-        for (GameObject object : new HashSet<>(objects)) {
+        for (GameObject object : objects) {
             object.tick();
         }
-        for (UIComponent uiComponent : new HashSet<>(uiObjects)) {
+        for (UIComponent uiComponent : uiObjects) {
             uiComponent.tick();
         }
+
+        for (GameObject object : objectsToRemove) {
+            objects.remove(object);
+            for (CollisionLayer collisionLayer : collisionLayers.values()) {
+                collisionLayer.remove(object);
+            }
+        }
+        objectsToRemove.clear();
+        objects.addAll(objectsToAdd);
+        objectsToAdd.clear();
+        uiObjects.removeAll(uiObjectsToRemove);
+        uiObjectsToRemove.clear();
+        uiObjects.addAll(uiObjectsToAdd);
+        uiObjectsToAdd.clear();
     }
 
     public QuadTree quadTreeForLayers(int[] mask) {
@@ -34,7 +52,7 @@ public class Handler {
     }
 
     public void collisions() {
-        for (GameObject object : new HashSet<>(objects)) {
+        for (GameObject object : objects) {
             for (int layer : object.getCollisionMask()) {
                 CollisionLayer collisionLayer = collisionLayers.computeIfAbsent(layer, CollisionLayer::new);
                 for (GameObject collisionObject : collisionLayer.getObjects())
@@ -74,26 +92,7 @@ public class Handler {
     public void render(Graphics g) {
         for (GameObject object : YSortable.sort(objects)) {
             object.render(g);
-//            Rectangle objectBounds = object.getBounds();
-//            for (int x = objectBounds.x; x <= objectBounds.x + objectBounds.width; x += PIXEL_SIZE) {
-//                for (int y = objectBounds.y; y <= objectBounds.y + objectBounds.height; y += PIXEL_SIZE) {
-//                    g.setColor(Color.GREEN);
-//                    g.drawOval(x, y, 2, 2);
-//                }
-//            }
         }
-
-//        QuadTree quadTree = quadTreeForLayers(new int[]{Layers.BLOCKS});
-//        renderTree(quadTree, (Graphics2D) g);
-
-//        for (QuadTree tree : QuadTree.quadTrees.values()) renderTree(tree, (Graphics2D) g);
-
-//        for (int x = 0; x < Game.getInstance().getWidth(); x += 32) {
-//            for (int y = 0; y < Game.getInstance().getHeight(); y += 32) {
-//                g.setColor(Color.BLUE);
-//                g.drawOval(x, y, 2, 2);
-//            }
-//        }
     }
 
     private void renderTree(QuadTree quadTree, Graphics2D g) {
@@ -126,22 +125,19 @@ public class Handler {
     }
 
     public void addObject(GameObject object) {
-        objects.add(object);
+        objectsToAdd.add(object);
     }
 
     public void addObject(UIComponent object) {
-        uiObjects.add(object);
+        uiObjectsToAdd.add(object);
     }
 
     public void removeObject(GameObject object) {
-        objects.remove(object);
-        for (CollisionLayer collisionLayer : collisionLayers.values()) {
-            collisionLayer.remove(object);
-        }
+        objectsToRemove.add(object);
     }
 
     public void removeObject(UIComponent object) {
-        uiObjects.remove(object);
+        uiObjectsToRemove.add(object);
     }
 
     public Set<GameObject> getObjects() {
@@ -165,8 +161,8 @@ public class Handler {
     }
 
     public void clear() {
-        Set<GameObject> objects = new HashSet<>(this.objects);
-        Set<UIComponent> uiObjects = new HashSet<>(this.uiObjects);
+        Set<GameObject> objects = this.objects;
+        Set<UIComponent> uiObjects = this.uiObjects;
         for (GameObject object : objects) {
             object.destroy();
         }

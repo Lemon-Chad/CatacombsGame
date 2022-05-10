@@ -36,16 +36,22 @@ public class InfinitySpawner extends GameObject {
         if (player == null) return;
         Enemy enemy = getEnemy((int) ox + player.getX(), (int) oy + player.getY());
         Game.getInstance().getWorld().addObject(enemy);
+        double vesselChance = spawns / 200.0;
+        while (Math.random() < vesselChance) {
+            Enemy vessel = new Vessel(enemy.getX(), enemy.getY());
+            Game.getInstance().getWorld().addObject(vessel);
+            vesselChance -= 1;
+        }
     }
 
     public Enemy getEnemy(int x, int y) {
         double chance = Math.random();
-        if (chance > 0.9 && spawns > 150) {
-            // Spawn shadow (purple)
-            return new Shadow(x, y);
-        } else if (chance <= 0.9 && chance > 0.8 && spawns > 100) {
+        if (chance > 0.99 && spawns > 150) {
             // Spawn goliath (blue)
             return new Goliath(x, y);
+        } else if (chance <= 0.99 && chance > 0.8 && spawns > 100) {
+            // Spawn shadow (purple)
+            return new Shadow(x, y);
         } else if (chance <= 0.8 && chance > 0.6 && spawns > 50) {
             // Spawn hunter (red)
             return new Hunter(x, y);

@@ -63,12 +63,24 @@ public abstract class Enemy extends PathingObject {
 
     @Override
     public void tick() {
+        tick(32, 32);
+    }
+
+    protected void tick(int maxDepth, int stepSize) {
         super.tick();
+
+        Player player = Game.getInstance().getPlayer();
+        if (player != null) {
+            if (Point.distance(x, y, player.getX(), player.getY()) > 10_000) {
+                // Despawn
+                destroy();
+            }
+        }
 
         stateDuration--;
         switch (state) {
             case CHASE: {
-                Vector pathVelocity = path(32, 32, getSpeed());
+                Vector pathVelocity = path(maxDepth, stepSize, getSpeed());
                 setVelX((float) pathVelocity.x);
                 setVelY((float) pathVelocity.y);
                 break;
@@ -113,6 +125,7 @@ public abstract class Enemy extends PathingObject {
     @Override
     protected void onDeath() {
         PlayerHUD.kills++;
+        Game.getInstance().getCamera().setShake(2f);
         destroy();
         explode();
 
@@ -157,8 +170,8 @@ public abstract class Enemy extends PathingObject {
         bullet.setDamage(damage);
 
         Game.getInstance().getWorld().addObject(bullet);
-        AudioHandler.Sound sound = Game.getInstance().getAudioHandler().playSound("/sounds/pistol/fire" + (int) (1 + Math.random() * 2) + ".wav");
-        sound.setVolume(0.25f);
+        Game.getInstance().getAudioHandler().playSound("/sounds/pistol/fire" + (int) (1 + Math.random() * 2)
+                + ".wav", 0.25f, false);
     }
 
     @Override

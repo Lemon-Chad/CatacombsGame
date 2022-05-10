@@ -26,6 +26,7 @@ public class PlayerBullet extends Bullet {
 
     @Override
     public void collision(GameObject other) {
+        super.collision(other);
         if (other.getId() == ID.Enemy) {
             Enemy enemy = (Enemy) other;
             if (enemy.getState() == Enemy.State.STUN) return;

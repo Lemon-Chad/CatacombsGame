@@ -17,7 +17,7 @@ public class ThrownWeapon extends GameObject {
     private final Sprite sprite;
     private final int width;
     private final int height;
-    private final AudioHandler.Sound sound;
+    private final int sound;
     private int life = 80;
 
     public ThrownWeapon(Sprite sprite, int x, int y, double throwAngle) {
@@ -31,7 +31,7 @@ public class ThrownWeapon extends GameObject {
         addCollisionMask(Layers.BLOCKS);
         addCollisionMask(Layers.ENEMY);
         addCollisionLayer(Layers.PLAYER_PROJECTILES);
-        sound = Game.playSound("/sounds/throw.wav");
+        sound = Game.playSound("/sounds/throw.wav", 1f, true);
     }
 
     @Override
@@ -72,8 +72,7 @@ public class ThrownWeapon extends GameObject {
         if (other.getId() == ID.Enemy) {
             Enemy enemy = (Enemy) other;
             enemy.cancelLoot();
-            enemy.damage(enemy.getHealth(), this);
-            Utils.bloodsplosion(x, y, enemy.getMaxHealth() * 10, 1, 10);
+            enemy.damage(250, this);
         }
         destroy();
     }
@@ -85,6 +84,6 @@ public class ThrownWeapon extends GameObject {
     @Override
     public void destroy() {
         super.destroy();
-        sound.stop();
+        Game.getInstance().getAudioHandler().stopSound(sound);
     }
 }

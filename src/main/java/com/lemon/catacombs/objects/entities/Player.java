@@ -9,6 +9,8 @@ import com.lemon.catacombs.items.Weapon;
 import com.lemon.catacombs.objects.ID;
 import com.lemon.catacombs.objects.Layers;
 import com.lemon.catacombs.objects.entities.enemies.Enemy;
+import com.lemon.catacombs.objects.particles.FireParticle;
+import com.lemon.catacombs.objects.projectiles.Bullet;
 import com.lemon.catacombs.objects.projectiles.PlayerBullet;
 import com.lemon.catacombs.objects.projectiles.ThrownLeverShotgun;
 import com.lemon.catacombs.objects.projectiles.ThrownWeapon;
@@ -138,6 +140,7 @@ public class Player extends Damageable {
 
     private void dash() {
         dash = false;
+        Game.getInstance().getCamera().setZoom(Game.getInstance().getCamera().getZoom() * 1.2f);
         extendSpeed(getVelX() * 2, getVelY() * 2);
         maxSpeed = Math.max(maxSpeed * 1.3f, MAX_SPEED * 3);
         setInvincibility(30);
@@ -305,7 +308,7 @@ public class Player extends Damageable {
 
             Game.getInstance().getWorld().addObject(left);
             Game.getInstance().getWorld().addObject(right);
-        } else if (equipped.isLever()) {
+        } else if (equipped.isLever() && equipped instanceof Shotgun) {
             Shotgun shotgun = (Shotgun) equipped;
             ThrownLeverShotgun leverShotgun = new ThrownLeverShotgun(shotgun, x + 16, y + 16, throwAngle);
             Game.getInstance().getWorld().addObject(leverShotgun);
@@ -341,7 +344,7 @@ public class Player extends Damageable {
         hand.y = location.y;
     }
 
-    public void shoot(float speed, int damage, double bloom) {
+    public Bullet shoot(float speed, int damage, double bloom) {
         double angle = crosshair() + Math.random() * bloom - bloom / 2;
         float velX = (float) Math.cos(angle) * speed;
         float velY = (float) Math.sin(angle) * speed;
@@ -350,6 +353,7 @@ public class Player extends Damageable {
         playerBullet.setVelY(velY);
         playerBullet.setDamage(damage);
         Game.getInstance().getWorld().addObject(playerBullet);
+        return playerBullet;
     }
 
     @Override
@@ -358,11 +362,9 @@ public class Player extends Damageable {
         Game.playSound("/sounds/hit/kill.wav");
         Utils.bloodsplosion(x, y, 1500, 3, 15);
         destroy();
-        Timer timer = new Timer(1000, e -> Game.getInstance().getWorld().addObject(new FadeOut(100,
+        Game.later(1000, () -> Game.getInstance().getWorld().addObject(new FadeOut(100,
                 () -> Game.getInstance().menu()
         )));
-        timer.setRepeats(false);
-        timer.start();
     }
 
     private Player getThis() {
@@ -393,12 +395,14 @@ public class Player extends Damageable {
     }
 
     private class Punch extends GameObject {
+        private final int damage;
         private int life = 2;
 
         public Punch(int x, int y) {
             super(x, y, ID.PlayerProjectile);
             addCollisionLayer(Layers.PLAYER_PROJECTILES);
             addCollisionMask(Layers.ENEMY);
+            damage = equipped.meleeDamage() == 0 ? 30 : equipped.meleeDamage();
         }
 
         @Override
@@ -419,7 +423,7 @@ public class Player extends Damageable {
         public void collision(GameObject other) {
             if (other.getId() == ID.Enemy) {
                 Enemy enemy = (Enemy) other;
-                enemy.damage(30, getThis());
+                enemy.damage(damage, getThis());
                 Game.getInstance().getCamera().setZoom(1.1f);
             }
         }

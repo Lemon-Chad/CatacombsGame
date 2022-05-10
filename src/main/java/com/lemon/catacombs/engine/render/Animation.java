@@ -4,7 +4,7 @@ import com.lemon.catacombs.engine.Game;
 
 import java.awt.image.BufferedImage;
 
-public class Animation {
+public class Animation implements Spriteable {
     private final Sprite[] frames;
     private final int numFrames;
 
@@ -91,9 +91,32 @@ public class Animation {
         return new Animation(frames);
     }
 
+    public static Animation LoadSpriteSheet(String ref, int frameCount, int frameWidth, int frameHeight) {
+        BufferedImage spriteSheet = Game.loadImage(ref);
+        int width = spriteSheet.getWidth();
+        int height = spriteSheet.getHeight();
+        Sprite[] frames = new Sprite[frameCount];
+        int i = 0;
+        for (int y = 0; y < height; y += frameHeight) {
+            for (int x = 0; x < width; x += frameWidth) {
+                frames[i] = new Sprite(spriteSheet.getSubimage(x, y, frameWidth, frameHeight));
+                i++;
+                if (i == frameCount)
+                    return new Animation(frames);
+            }
+        }
+        throw new RuntimeException("Frame count does not match frame count in sprite sheet");
+    }
+
     public void reset() {
         currentFrame = 0;
         delta = 0;
         lastTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public Sprite getSprite() {
+        update();
+        return getFrame();
     }
 }
