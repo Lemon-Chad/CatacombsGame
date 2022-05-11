@@ -15,12 +15,12 @@ public class PlayerBullet extends Bullet {
     }
 
     @Override
-    Color getColor() {
+    protected Color getColor() {
         return new Color(255, 255, 255);
     }
 
     @Override
-    int getSize() {
+    protected int getSize() {
         return 8;
     }
 

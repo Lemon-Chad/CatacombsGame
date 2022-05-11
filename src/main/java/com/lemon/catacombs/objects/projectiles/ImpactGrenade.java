@@ -20,7 +20,7 @@ public class ImpactGrenade extends Bullet {
         this.cookTime = cookTime;
         this.damage = damage;
         this.radius = radius;
-        this.cooldown = 10;
+        this.cooldown = 1;
         addCollisionLayer(Layers.PROJECTILES);
         addCollisionMask(Layers.PLAYER);
         addCollisionMask(Layers.ENEMY);
@@ -31,8 +31,8 @@ public class ImpactGrenade extends Bullet {
     public void tick() {
         super.tick();
         cooldown--;
-        x += getVelX();
-        y += getVelY();
+        x += Math.round(getVelX());
+        y += Math.round(getVelY());
 
         setVelX(getVelX() * 0.99f);
         setVelY(getVelY() * 0.99f);
@@ -44,12 +44,12 @@ public class ImpactGrenade extends Bullet {
     }
 
     @Override
-    Color getColor() {
+    protected Color getColor() {
         return new Color(255, cookTime * 255 / maxCookTime, cookTime * 255 / maxCookTime);
     }
 
     @Override
-    int getSize() {
+    protected int getSize() {
         return 16;
     }
 

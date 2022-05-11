@@ -31,8 +31,10 @@ public abstract class Bullet extends GameObject {
 
     @Override
     public void tick() {
-        x += getVelX();
-        y += getVelY();
+        super.tick();
+
+        x += Math.round(getVelX());
+        y += Math.round(getVelY());
 
         setVelX(getVelX() * 0.99f);
         setVelY(getVelY() * 0.99f);
@@ -66,9 +68,9 @@ public abstract class Bullet extends GameObject {
         impactEffects.add(effect);
     }
 
-    abstract Color getColor();
+    protected abstract Color getColor();
 
-    abstract int getSize();
+    protected abstract int getSize();
 
     @Override
     public boolean collidesWith(GameObject o) {

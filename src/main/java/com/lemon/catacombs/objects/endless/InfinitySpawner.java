@@ -20,6 +20,7 @@ public class InfinitySpawner extends GameObject {
 
     @Override
     public void tick() {
+        super.tick();
         spawnTimer++;
         if (spawnTimer >= spawnDelay) {
             spawnTimer = -(int)(Math.random() * spawnDelay / 2);

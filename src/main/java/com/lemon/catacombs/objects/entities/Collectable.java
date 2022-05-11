@@ -47,6 +47,7 @@ public class Collectable extends GameObject {
 
     @Override
     public void tick() {
+        super.tick();
         scale = initialScale + 0.75f * (1 + (float) Math.sin(life * 0.075));
         life--;
         if (life <= 0) {

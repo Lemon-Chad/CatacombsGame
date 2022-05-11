@@ -8,6 +8,7 @@ import com.lemon.catacombs.items.guns.pistols.Pistols;
 import com.lemon.catacombs.items.guns.pistols.Revolver;
 import com.lemon.catacombs.items.guns.rifles.CarbineRifle;
 import com.lemon.catacombs.items.guns.rifles.ThumperRifle;
+import com.lemon.catacombs.items.guns.rifles.WebRifle;
 import com.lemon.catacombs.items.guns.shotguns.CombatShotgun;
 import com.lemon.catacombs.items.guns.shotguns.LeverShotgun;
 import com.lemon.catacombs.objects.entities.Collectable;
@@ -46,11 +47,13 @@ public interface Weapon {
     static Weapon generateRifle() {
         int type = (int) (Math.random() * 2);
         // Will add more in future
-        //noinspection SwitchStatementWithTooFewBranches
         switch (type) {
             case 1:
                 // Thumper Grenadier Rifle
                 return new ThumperRifle();
+            case 2:
+                // Web Rifle
+                return new WebRifle();
             default:
                 // Carbine Rifle
                 return new CarbineRifle();

@@ -17,12 +17,12 @@ public class EnemyBullet extends Bullet {
     }
 
     @Override
-    Color getColor() {
+    protected Color getColor() {
         return new Color(255, 100, 100);
     }
 
     @Override
-    int getSize() {
+    protected int getSize() {
         return size;
     }
 

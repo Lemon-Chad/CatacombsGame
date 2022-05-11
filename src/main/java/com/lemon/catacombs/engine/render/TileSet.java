@@ -103,11 +103,6 @@ public class TileSet {
         }
 
         @Override
-        public void tick() {
-            // Do nothing
-        }
-
-        @Override
         public void render(Graphics g) {
             tile.render(g, x, y, tileWidth, tileHeight);
         }

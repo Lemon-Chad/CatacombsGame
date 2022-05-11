@@ -36,14 +36,16 @@ public class ThrownWeapon extends GameObject {
 
     @Override
     public void tick() {
+        super.tick();
+
         this.spin += 0.5;
         this.life--;
         if (life <= 0) {
             destroy();
         }
 
-        x += getVelX();
-        y += getVelY();
+        x += Math.round(getVelX());
+        y += Math.round(getVelY());
     }
 
     @SuppressWarnings("DuplicatedCode")

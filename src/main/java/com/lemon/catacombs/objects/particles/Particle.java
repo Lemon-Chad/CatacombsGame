@@ -25,11 +25,13 @@ abstract public class Particle extends GameObject {
 
     @Override
     public void tick() {
+        super.tick();
+
         setVelX((float) Utils.approachZero(getVelX(), friction));
         setVelY((float) Utils.approachZero(getVelY(), friction));
 
-        x += getVelX();
-        y += getVelY();
+        x += Math.round(getVelX());
+        y += Math.round(getVelY());
 
         life++;
         if (life >= decay * 2)

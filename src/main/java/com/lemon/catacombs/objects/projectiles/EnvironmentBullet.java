@@ -15,12 +15,12 @@ public class EnvironmentBullet extends Bullet {
     }
 
     @Override
-    Color getColor() {
+    protected Color getColor() {
         return new Color(255, 200, 200);
     }
 
     @Override
-    int getSize() {
+    protected int getSize() {
         return 8;
     }
 

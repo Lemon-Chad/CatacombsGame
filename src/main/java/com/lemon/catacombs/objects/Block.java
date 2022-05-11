@@ -11,11 +11,6 @@ public class Block extends GameObject {
     }
 
     @Override
-    public void tick() {
-
-    }
-
-    @Override
     public void render(Graphics g) {
         g.setColor(new Color(200, 200, 200, 100));
         g.fillRect(x, y, 32, 32);

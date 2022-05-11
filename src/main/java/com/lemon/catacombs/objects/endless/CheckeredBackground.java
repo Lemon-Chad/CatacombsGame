@@ -21,11 +21,6 @@ public class CheckeredBackground extends GameObject {
     }
 
     @Override
-    public void tick() {
-
-    }
-
-    @Override
     public void render(Graphics g) {
         int cx = (int) Game.getInstance().getCamera().getX();
         int cy = (int) Game.getInstance().getCamera().getY();

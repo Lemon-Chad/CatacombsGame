@@ -18,8 +18,10 @@ abstract public class PhysicsObject extends GameObject {
 
     @Override
     public void tick() {
-        x += getVelX();
-        y += getVelY();
+        super.tick();
+
+        x += Math.round(getVelX());
+        y += Math.round(getVelY());
 
         addVelX(futureVelX);
         futureVelX = 0;

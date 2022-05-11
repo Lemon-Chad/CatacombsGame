@@ -4,11 +4,14 @@ import javax.sound.sampled.*;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class AudioHandler {
     private int loopCount = 0;
     private final Map<Integer, Sound> loops = new HashMap<>();
+    private final Set<Integer> toStop = new HashSet<>();
 
     public static class Sound {
         private final String name;
@@ -95,6 +98,13 @@ public class AudioHandler {
             if (loop) {
                 s.loop();
                 loops.put(id, s);
+                if (toStop.contains(id)) {
+                    s.stop();
+                    s.close();
+                    toStop.remove(id);
+                    loops.remove(id);
+                    return;
+                }
             }
             s.play();
             s.getClip().addLineListener(e -> {
@@ -116,7 +126,9 @@ public class AudioHandler {
 
     public void stopSound(int id) {
         if (loops.containsKey(id)) {
-            loops.remove(id).stop();
+            loops.get(id).stop();
+        } else {
+            toStop.add(id);
         }
     }
 }

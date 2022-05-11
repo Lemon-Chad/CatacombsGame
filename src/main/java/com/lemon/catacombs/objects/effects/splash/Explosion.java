@@ -57,6 +57,8 @@ public class Explosion extends GameObject {
 
     @Override
     public void tick() {
+        super.tick();
+
         Game.getInstance().getCamera().setShake(1 + currentRadius / 2f);
         int points = 2 * currentRadius * (currentRadius - 1) + 1;
         for (int i = 0; i < points; i++) {

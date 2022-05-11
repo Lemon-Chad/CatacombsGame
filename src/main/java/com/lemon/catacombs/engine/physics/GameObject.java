@@ -14,6 +14,7 @@ abstract public class GameObject implements YSortable {
     protected final int id;
     private final Set<Integer> collisionLayer;
     private final Set<Integer> collisionMask;
+    private final Set<Effect> effects;
 
     public GameObject(int x, int y, int id) {
         this.x = x;
@@ -21,9 +22,51 @@ abstract public class GameObject implements YSortable {
         this.id = id;
         this.collisionLayer = new HashSet<>();
         this.collisionMask = new HashSet<>();
+        this.effects = new HashSet<>();
     }
 
-    public abstract void tick();
+    private class Effect {
+        private final EffectListener listener;
+        private final int duration;
+        private int timeLeft;
+
+        public Effect(EffectListener listener, int duration) {
+            this.listener = listener;
+            this.duration = duration;
+            this.timeLeft = duration;
+        }
+
+        public boolean update() {
+            if (timeLeft == duration) {
+                listener.onEffectStart(GameObject.this);
+            }
+            timeLeft--;
+            listener.onEffect(GameObject.this);
+            if (timeLeft <= 0) {
+                listener.onEffectEnd(GameObject.this);
+                return true;
+            }
+            return false;
+        }
+    }
+
+    public interface EffectListener {
+        void onEffectStart(GameObject gameObject);
+        void onEffect(GameObject object);
+        void onEffectEnd(GameObject gameObject);
+    }
+
+    public void addEffect(EffectListener effect, int duration) {
+        effects.add(new Effect(effect, duration));
+    }
+
+    public void tick() {
+        Set<Effect> toRemove = new HashSet<>();
+        for (Effect effect : effects) {
+            if (effect.update()) toRemove.add(effect);
+        }
+        effects.removeAll(toRemove);
+    }
     public abstract void render(Graphics g);
     public abstract Rectangle getBounds();
 
@@ -99,9 +142,9 @@ abstract public class GameObject implements YSortable {
         Game.getInstance().getWorld().removeFromLayer(this, layer);
     }
 
-    protected void normalizeVelocity() { normalizeVelocity(1); }
+    public void normalizeVelocity() { normalizeVelocity(1); }
 
-    protected void normalizeVelocity(float maxVel) {
+    public void normalizeVelocity(float maxVel) {
         double magnitude = Math.sqrt(velX * velX + velY * velY);
         if (magnitude < maxVel) {
             return;

@@ -399,6 +399,7 @@ public class Player extends Damageable {
         double angle = crosshair() + Math.random() * bloom - bloom / 2;
         float velX = (float) Math.cos(angle) * speed;
         float velY = (float) Math.sin(angle) * speed;
+        System.out.println(velX + " " + velY);
         bullet.setVelX(velX);
         bullet.setVelY(velY);
         bullet.setDamage(damage);
@@ -462,6 +463,7 @@ public class Player extends Damageable {
 
         @Override
         public void tick() {
+            super.tick();
             life--;
             if (life <= 0) destroy();
         }
