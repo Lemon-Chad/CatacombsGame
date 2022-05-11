@@ -10,8 +10,8 @@ import java.awt.*;
 
 public class InfinitySpawner extends GameObject {
     private static final int spawnDelay = 100;
-    private static final int spawnRadius = 300;
-    private int spawnTimer = -spawnDelay * 3;
+    private static final int spawnRadius = 1000;
+    private int spawnTimer = -spawnDelay;
     private int spawns = 0;
 
     public InfinitySpawner() {

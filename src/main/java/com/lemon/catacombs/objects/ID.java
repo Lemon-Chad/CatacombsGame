@@ -10,4 +10,5 @@ public class ID {
     public static final int Projectile = 7;
     public static final int Collectable = 8;
     public static final int EnemyProjectile = 9;
+    public static final int SplashEffect = 10;
 }

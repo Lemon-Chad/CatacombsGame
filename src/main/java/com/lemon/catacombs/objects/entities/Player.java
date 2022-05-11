@@ -4,12 +4,11 @@ import com.lemon.catacombs.Utils;
 import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.input.MouseEvents;
 import com.lemon.catacombs.engine.physics.GameObject;
-import com.lemon.catacombs.items.Shotgun;
+import com.lemon.catacombs.items.guns.shotguns.Shotgun;
 import com.lemon.catacombs.items.Weapon;
 import com.lemon.catacombs.objects.ID;
 import com.lemon.catacombs.objects.Layers;
 import com.lemon.catacombs.objects.entities.enemies.Enemy;
-import com.lemon.catacombs.objects.particles.FireParticle;
 import com.lemon.catacombs.objects.projectiles.Bullet;
 import com.lemon.catacombs.objects.projectiles.PlayerBullet;
 import com.lemon.catacombs.objects.projectiles.ThrownLeverShotgun;
@@ -20,7 +19,6 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import javax.swing.Timer;
 
 public class Player extends Damageable {
 
@@ -28,6 +26,13 @@ public class Player extends Damageable {
     private boolean dash = false;
 
     private boolean moving;
+
+    private static final double JUMP_SPEED = 0.1f;
+
+    private int prejump;
+    private double jump;
+    private boolean jumping;
+    private int bHopDelay;
 
     private static final int MAX_SPEED = 7;
     private static final float FRICTION = 0.8f;
@@ -62,7 +67,8 @@ public class Player extends Damageable {
         Game.onKeyPressed(KeyEvent.VK_A, event -> left = true);
         Game.onKeyPressed(KeyEvent.VK_D, event -> right = true);
 
-        Game.onKeyPressed(KeyEvent.VK_SPACE, event -> dash = true);
+        Game.onKeyPressed(KeyEvent.VK_SHIFT, event -> useStamina(50, this::dash));
+        Game.onKeyPressed(KeyEvent.VK_SPACE, event -> prejump = 8);
 
         Game.onKeyReleased(KeyEvent.VK_W, event -> up = false);
         Game.onKeyReleased(KeyEvent.VK_S, event -> down = false);
@@ -85,16 +91,30 @@ public class Player extends Damageable {
     public void tick() {
         super.tick();
         interacting--;
-
-        stamina = Math.min(stamina + 1, MAX_STAMINA);
+        bHopDelay--;
 
         regulateHands();
+
+        prejump--;
+        if (prejump > 0 && !jumping) {
+            useStamina(10, this::startJump);
+            prejump = 0;
+        }
 
         // Friction
         setVelX((float) Utils.approachZero(getVelX(), FRICTION));
         setVelY((float) Utils.approachZero(getVelY(), FRICTION));
 
-        maxSpeed = (float) Utils.approach(maxSpeed, MAX_SPEED, FRICTION);
+        if (!jumping && bHopDelay <= 0) {
+            maxSpeed = (float) Utils.approach(maxSpeed, MAX_SPEED, FRICTION);
+            stamina = Math.min(stamina + 1, MAX_STAMINA);
+            if (bHopDelay > -10) {
+                maxSpeed = (float) Utils.approach(maxSpeed, MAX_SPEED, FRICTION * 2);
+            }
+            normalizeVelocity(maxSpeed);
+        } else {
+            maxSpeed = (float) Utils.approach(maxSpeed, MAX_SPEED, FRICTION / 32);
+        }
 
         boolean moving = getVelX() != 0 || getVelY() != 0;
         if (this.moving != moving)
@@ -106,16 +126,11 @@ public class Player extends Damageable {
         if (left) addSpeed(-1.5f, 0);
         else if (right) addSpeed(1.5f, 0);
 
-        if (dash) {
-            useStamina(50, this::dash);
-            dash = false;
-        }
-
-        normalizeVelocity(maxSpeed);
-
         if (equipped != null) {
             equipped.tick();
         }
+
+        jumpTick();
     }
 
     public void swapWeapons(int index) {
@@ -139,11 +154,36 @@ public class Player extends Damageable {
     }
 
     private void dash() {
-        dash = false;
         Game.getInstance().getCamera().setZoom(Game.getInstance().getCamera().getZoom() * 1.2f);
         extendSpeed(getVelX() * 2, getVelY() * 2);
         maxSpeed = Math.max(maxSpeed * 1.3f, MAX_SPEED * 3);
         setInvincibility(30);
+    }
+
+    private void startJump() {
+        jumping = true;
+        stamina -= 10;
+
+        removeCollisionLayer(Layers.PLAYER);
+    }
+
+    private void jumpTick() {
+        if (!jumping) return;
+        jump += JUMP_SPEED;
+        if (jump >= 2) {
+            stopJump();
+        }
+    }
+
+    private void stopJump() {
+        jumping = false;
+        jump = 0;
+        bHopDelay = 7;
+        addCollisionLayer(Layers.PLAYER);
+    }
+
+    private double getJumpArc() {
+        return Math.sin(jump * Math.PI / 2);
     }
 
     public boolean isInteracting() {
@@ -181,8 +221,8 @@ public class Player extends Damageable {
     }
 
     public void addSpeed(float x, float y) {
-        if (getVelX() + x < MAX_SPEED && getVelX() + x  > -MAX_SPEED) addVelX(x);
-        if (getVelY() + y < MAX_SPEED && getVelY() + y > -MAX_SPEED) addVelY(y);
+        if (getVelX() + x < maxSpeed && getVelX() + x  > -maxSpeed) addVelX(x);
+        if (getVelY() + y < maxSpeed && getVelY() + y > -maxSpeed) addVelY(y);
     }
 
     public void extendSpeed(float x, float y) {
@@ -208,6 +248,12 @@ public class Player extends Damageable {
     public void render(Graphics g) {
         double mouseAngle = crosshair();
         Point position = crosshairPosition(32);
+
+        int y = this.y - (int) (32 * getJumpArc());
+
+        // Render jump shadow
+        g.setColor(new Color(0, 0, 0, 100));
+        g.fillRect(x + 16 - (int) (16 * getJumpArc()), this.y + 32 - (int) (8 * getJumpArc()), (int) (32 * getJumpArc()), (int) (16 * getJumpArc()));
 
         // Render body
         g.setColor(getColor());
@@ -321,7 +367,7 @@ public class Player extends Damageable {
     }
 
     private double crosshair() {
-        return crosshair(this.x - 16, this.y - 16);
+        return crosshair(this.x + 16, this.y + 16);
     }
 
     private double crosshair(int ox, int oy) {
@@ -334,6 +380,11 @@ public class Player extends Damageable {
         return a - (equipped != null ? equipped.getRecoil() : 0) * (Math.floor(a / Math.PI + 0.5) != 0 ? -1 : 1);
     }
 
+    @Override
+    public int getYSort() {
+        return super.getYSort() + (int) (16 * getJumpArc());
+    }
+
     private void punch() {
         boolean left = Math.random() > 0.5;
         Point hand = left ? leftHand : rightHand;
@@ -344,16 +395,20 @@ public class Player extends Damageable {
         hand.y = location.y;
     }
 
-    public Bullet shoot(float speed, int damage, double bloom) {
+    public Bullet shoot(float speed, int damage, double bloom, Bullet bullet) {
         double angle = crosshair() + Math.random() * bloom - bloom / 2;
         float velX = (float) Math.cos(angle) * speed;
         float velY = (float) Math.sin(angle) * speed;
+        bullet.setVelX(velX);
+        bullet.setVelY(velY);
+        bullet.setDamage(damage);
+        Game.getInstance().getWorld().addObject(bullet);
+        return bullet;
+    }
+
+    public Bullet shoot(float speed, int damage, double bloom) {
         PlayerBullet playerBullet = new PlayerBullet(this.x + 16, this.y + 16);
-        playerBullet.setVelX(velX);
-        playerBullet.setVelY(velY);
-        playerBullet.setDamage(damage);
-        Game.getInstance().getWorld().addObject(playerBullet);
-        return playerBullet;
+        return shoot(speed, damage, bloom, playerBullet);
     }
 
     @Override

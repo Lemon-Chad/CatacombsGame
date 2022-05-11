@@ -1,4 +1,4 @@
-package com.lemon.catacombs.items;
+package com.lemon.catacombs.items.guns.shotguns;
 
 import com.lemon.catacombs.engine.render.Sprite;
 import com.lemon.catacombs.objects.entities.Player;
@@ -22,7 +22,7 @@ public class CombatShotgun extends Shotgun {
     }
 
     @Override
-    void onShoot(Player player) {
+    protected void onShoot(Player player) {
         fireBlast(player, 20f, 0.6f, getDamage(), getBloom(), getPellets());
         knockback(player, getKnockback());
     }

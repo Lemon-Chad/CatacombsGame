@@ -1,14 +1,11 @@
-package com.lemon.catacombs.items;
+package com.lemon.catacombs.items.guns;
 
 import com.lemon.catacombs.Utils;
 import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.render.Sprite;
 import com.lemon.catacombs.engine.render.Spriteable;
+import com.lemon.catacombs.items.Weapon;
 import com.lemon.catacombs.objects.entities.Player;
-
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public abstract class Gun implements Weapon {
     protected int damage;
@@ -88,7 +85,7 @@ public abstract class Gun implements Weapon {
         ammo--;
     }
 
-    abstract void onShoot(Player player);
+    protected abstract void onShoot(Player player);
 
     @Override
     public abstract Sprite getSprite();

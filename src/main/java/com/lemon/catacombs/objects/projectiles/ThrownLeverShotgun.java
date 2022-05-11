@@ -2,7 +2,7 @@ package com.lemon.catacombs.objects.projectiles;
 
 import com.lemon.catacombs.Utils;
 import com.lemon.catacombs.engine.Game;
-import com.lemon.catacombs.items.Shotgun;
+import com.lemon.catacombs.items.guns.shotguns.Shotgun;
 
 import java.awt.*;
 

@@ -4,6 +4,7 @@ import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.physics.GameObject;
 import com.lemon.catacombs.objects.Layers;
 import com.lemon.catacombs.objects.entities.Player;
+import org.w3c.dom.css.Rect;
 
 import java.awt.*;
 import java.util.HashSet;
@@ -25,6 +26,7 @@ public abstract class Bullet extends GameObject {
     public Bullet(int x, int y, int id) {
         super(x, y, id);
         addCollisionMask(Layers.BLOCKS);
+        addCollisionLayer(Layers.PROJECTILES);
     }
 
     @Override
@@ -45,7 +47,7 @@ public abstract class Bullet extends GameObject {
 
         Player player = Game.getInstance().getPlayer();
         if (player != null) {
-            if (Point.distance(x, y, player.getX(), player.getY()) > 2_000) {
+            if (Point.distance(x, y, player.getX(), player.getY()) > 25_000) {
                 // Despawn
                 destroy();
             }
@@ -67,6 +69,11 @@ public abstract class Bullet extends GameObject {
     abstract Color getColor();
 
     abstract int getSize();
+
+    @Override
+    public boolean collidesWith(GameObject o) {
+        return o.getBounds().intersectsLine(x, y, (int) (x + getVelX()), (int) (y + getVelY()));
+    }
 
     @Override
     public void render(Graphics g) {

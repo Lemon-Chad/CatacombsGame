@@ -1,9 +1,10 @@
-package com.lemon.catacombs.items;
+package com.lemon.catacombs.items.guns.pistols;
 
 import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.render.Animation;
 import com.lemon.catacombs.engine.render.Sprite;
 import com.lemon.catacombs.engine.render.Spriteable;
+import com.lemon.catacombs.items.guns.Gun;
 import com.lemon.catacombs.objects.entities.Player;
 import com.lemon.catacombs.objects.particles.FireParticle;
 import com.lemon.catacombs.objects.particles.Particle;
@@ -11,7 +12,7 @@ import com.lemon.catacombs.objects.particles.Particle;
 public class GoldenRevolver extends Gun {
     private final Animation animation = Animation.LoadSpriteSheet("/sprites/guns/revolver_gold.png", 19, 32, 32);
     /*
-    * __REVOLVER__
+    * __Adonis__
     * - High damage
     * - High accuracy
     * - Low rate of fire
@@ -26,7 +27,7 @@ public class GoldenRevolver extends Gun {
     }
 
     @Override
-    void onShoot(Player player) {
+    protected void onShoot(Player player) {
         bullet(player);
         Game.later(100, () -> bullet(player));
     }

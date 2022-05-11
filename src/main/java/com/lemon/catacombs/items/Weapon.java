@@ -3,6 +3,13 @@ package com.lemon.catacombs.items;
 import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.render.Sprite;
 import com.lemon.catacombs.engine.render.Spriteable;
+import com.lemon.catacombs.items.guns.pistols.MachinePistol;
+import com.lemon.catacombs.items.guns.pistols.Pistols;
+import com.lemon.catacombs.items.guns.pistols.Revolver;
+import com.lemon.catacombs.items.guns.rifles.CarbineRifle;
+import com.lemon.catacombs.items.guns.rifles.ThumperRifle;
+import com.lemon.catacombs.items.guns.shotguns.CombatShotgun;
+import com.lemon.catacombs.items.guns.shotguns.LeverShotgun;
 import com.lemon.catacombs.objects.entities.Collectable;
 import com.lemon.catacombs.objects.entities.Player;
 
@@ -36,14 +43,30 @@ public interface Weapon {
         }
     }
 
-    static Weapon generateWeapon() {
+    static Weapon generateRifle() {
         int type = (int) (Math.random() * 2);
         // Will add more in future
         //noinspection SwitchStatementWithTooFewBranches
         switch (type) {
             case 1:
+                // Thumper Grenadier Rifle
+                return new ThumperRifle();
+            default:
+                // Carbine Rifle
+                return new CarbineRifle();
+        }
+    }
+
+    static Weapon generateWeapon() {
+        int type = (int) (Math.random() * 3);
+        // Will add more in future
+        switch (type) {
+            case 1:
                 // Shotgun
                 return generateShotgun();
+            case 2:
+                // Rifle
+                return generateRifle();
             default:
                 // Pistol
                 return generatePistol();

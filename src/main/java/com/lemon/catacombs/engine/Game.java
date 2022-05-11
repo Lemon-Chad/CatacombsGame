@@ -3,9 +3,13 @@ package com.lemon.catacombs.engine;
 import com.lemon.catacombs.engine.input.KeyInput;
 import com.lemon.catacombs.engine.input.MouseEvents;
 import com.lemon.catacombs.engine.input.MouseInput;
+import com.lemon.catacombs.engine.physics.GameObject;
 import com.lemon.catacombs.engine.render.Camera;
 import com.lemon.catacombs.engine.render.Window;
 import com.lemon.catacombs.items.*;
+import com.lemon.catacombs.items.guns.TestGun;
+import com.lemon.catacombs.items.guns.rifles.CarbineRifle;
+import com.lemon.catacombs.items.guns.rifles.ThumperRifle;
 import com.lemon.catacombs.objects.Block;
 import com.lemon.catacombs.objects.endless.CheckeredBackground;
 import com.lemon.catacombs.objects.endless.InfinitySpawner;
@@ -22,6 +26,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
+import java.util.Set;
 
 public class Game extends Canvas implements Runnable {
     private static final long serialVersionUID = 1L;
@@ -337,5 +342,9 @@ public class Game extends Canvas implements Runnable {
 
     public static void later(long delay, Runnable runnable) {
         getInstance().delayHandler.add(delay, runnable);
+    }
+
+    public static Set<GameObject> objectsIn(Shape polygon, Set<Integer> mask) {
+        return getInstance().handler.objectsIn(polygon, mask);
     }
 }

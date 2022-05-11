@@ -1,14 +1,14 @@
-package com.lemon.catacombs.items;
+package com.lemon.catacombs.items.guns.pistols;
 
 import com.lemon.catacombs.engine.Game;
-import com.lemon.catacombs.engine.render.Camera;
 import com.lemon.catacombs.engine.render.Sprite;
+import com.lemon.catacombs.items.guns.Gun;
 import com.lemon.catacombs.objects.entities.Player;
 
 public class Pistols extends Gun {
     private static final Sprite sprite = Sprite.LoadSprite("/sprites/guns/pistol.png");
     /*
-    * __PISTOLS__
+    * __Pistols__
     * - Medium damage
     * - Medium accuracy
     * - Medium rate of fire
@@ -22,7 +22,7 @@ public class Pistols extends Gun {
     }
 
     @Override
-    void onShoot(Player player) {
+    protected void onShoot(Player player) {
         player.shoot(48f, getDamage(), getBloom());
         player.shoot(48f, getDamage(), getBloom());
         Game.getInstance().getCamera().setZoom(1.02f);

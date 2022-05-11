@@ -10,7 +10,6 @@ import java.awt.*;
 public class EnvironmentBullet extends Bullet {
     public EnvironmentBullet(int x, int y) {
         super(x, y, ID.Projectile);
-        addCollisionLayer(Layers.PROJECTILES);
         addCollisionMask(Layers.ENEMY);
         addCollisionMask(Layers.PLAYER);
     }

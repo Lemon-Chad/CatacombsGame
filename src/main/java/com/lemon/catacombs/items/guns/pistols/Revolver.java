@@ -1,13 +1,14 @@
-package com.lemon.catacombs.items;
+package com.lemon.catacombs.items.guns.pistols;
 
 import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.render.Sprite;
+import com.lemon.catacombs.items.guns.Gun;
 import com.lemon.catacombs.objects.entities.Player;
 
 public class Revolver extends Gun {
     private static final Sprite sprite = Sprite.LoadSprite("/sprites/guns/revolver.png");
     /*
-    * __REVOLVER__
+    * __Revolver__
     * - High damage
     * - High accuracy
     * - Low rate of fire
@@ -21,7 +22,7 @@ public class Revolver extends Gun {
     }
 
     @Override
-    void onShoot(Player player) {
+    protected void onShoot(Player player) {
         player.shoot(20f, getDamage(), getBloom());
         Game.getInstance().getCamera().setZoom(1.02f);
         Game.getInstance().getCamera().setShake(1.2f);

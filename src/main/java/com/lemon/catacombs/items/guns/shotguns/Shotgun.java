@@ -1,8 +1,9 @@
-package com.lemon.catacombs.items;
+package com.lemon.catacombs.items.guns.shotguns;
 
 import com.lemon.catacombs.Utils;
 import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.render.Camera;
+import com.lemon.catacombs.items.guns.Gun;
 import com.lemon.catacombs.objects.entities.Player;
 
 public abstract class Shotgun extends Gun {

@@ -4,12 +4,15 @@ import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.render.UIComponent;
 import com.lemon.catacombs.items.Weapon;
 import com.lemon.catacombs.objects.ID;
+import com.lemon.catacombs.objects.entities.Player;
 
 import java.awt.*;
 
 public class PlayerHUD extends UIComponent {
     public static int kills = 0;
     public static int damage = 0;
+    public static double metersPerSecond = 0;
+    private int mpsRefresh = 8;
     private final Dimension healthBarSize;
     private final Dimension staminaBarSize;
     private final int inventoryBoxSize;
@@ -28,24 +31,35 @@ public class PlayerHUD extends UIComponent {
 
     @Override
     public void render(Graphics g) {
-        g.setFont(new Font("Arial", Font.BOLD, 30));
-        g.setColor(Color.WHITE);
-        int width = g.getFontMetrics().stringWidth(shorten(kills) + " kills");
-        g.drawString(shorten(kills) + " kills", Game.getInstance().getWidth() - width - 10, 30);
-        width = g.getFontMetrics().stringWidth(shorten(damage) + " damage");
-        g.drawString(shorten(damage) + " damage", Game.getInstance().getWidth() - width - 10, 60);
-
         if (Game.getInstance().getPlayer() == null) {
             return;
         }
         renderHealthBar(g);
         renderStaminaBar(g);
         renderInventory(g);
+        renderStats(g);
     }
 
-    private String shorten(int number) {
+    private void renderStats(Graphics g) {
+        mpsRefresh--;
+        if (mpsRefresh <= 0) {
+            Player player = Game.getInstance().getPlayer();
+            metersPerSecond = new Point((int) player.getVelX(), (int) player.getVelY()).distance(0, 0) / 5;
+            mpsRefresh = 8;
+        }
+        g.setFont(new Font("Arial", Font.BOLD, 30));
+        g.setColor(Color.WHITE);
+        int width = g.getFontMetrics().stringWidth(shorten(kills) + " kills");
+        g.drawString(shorten(kills) + " kills", Game.getInstance().getWidth() - width - 10, 30);
+        width = g.getFontMetrics().stringWidth(shorten(damage) + " damage");
+        g.drawString(shorten(damage) + " damage", Game.getInstance().getWidth() - width - 10, 60);
+        width = g.getFontMetrics().stringWidth(shorten(metersPerSecond) + " m/s");
+        g.drawString(shorten(metersPerSecond) + " m/s", Game.getInstance().getWidth() - width - 10, 90);
+    }
+
+    private String shorten(double number) {
         if (number < 1000) {
-            return number + "";
+            return Math.round(number * 100f) / 100f + "";
         } else if (number < 1000000) {
             return Math.round(number / 10f) / 100f + "k";
         } else if (number < 1000000000) {

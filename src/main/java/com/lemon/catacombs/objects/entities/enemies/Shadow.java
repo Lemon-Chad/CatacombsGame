@@ -55,7 +55,6 @@ public class Shadow extends Enemy {
         double angle = Math.atan2(y - target.y, x - target.x);
         // Evade perpendicular to the angle
         angle += Math.PI / 2;
-        System.out.println(angle);
         setEvadeAngle(angle);
         evadeCooldown = EVADE_SPEED;
         state(State.EVADE, 30);

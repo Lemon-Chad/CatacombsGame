@@ -171,4 +171,15 @@ public class Handler {
             object.destroy();
         }
     }
+
+    public Set<GameObject> objectsIn(Shape polygon, Set<Integer> mask) {
+        Set<GameObject> objects = new HashSet<>();
+        for (int layerID : mask) {
+            CollisionLayer layer = getLayer(layerID);
+            for (GameObject object : layer.getObjects())
+                if (polygon.intersects(object.getBounds()))
+                    objects.add(object);
+        }
+        return objects;
+    }
 }

@@ -8,4 +8,5 @@ public class Layers {
     public static final int ENEMY_PROJECTILES = 4;
     public static final int PROJECTILES = 5;
     public static final int ITEM = 6;
+    public static final int SPLASH = 7;
 }
