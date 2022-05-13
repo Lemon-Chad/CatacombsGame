@@ -111,7 +111,7 @@ public class Game extends Canvas implements Runnable {
         handler.addObject(new Player(0, 0));
         handler.addObject(new CheckeredBackground());
         handler.addObject(new InfinitySpawner());
-        handler.addObject(Weapon.dropWeapon(new Screwdriver(), 0, 64));
+        handler.addObject(Weapon.dropWeapon(Weapon.generateWeapon(), 0, 64));
         camera.setShake(3.0f);
         camera.setShakeDecayRate(0.99f);
         camera.setZoom(2.0f);

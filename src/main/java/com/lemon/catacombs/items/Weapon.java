@@ -11,12 +11,32 @@ import com.lemon.catacombs.items.guns.rifles.ThumperRifle;
 import com.lemon.catacombs.items.guns.rifles.WebRifle;
 import com.lemon.catacombs.items.guns.shotguns.CombatShotgun;
 import com.lemon.catacombs.items.guns.shotguns.LeverShotgun;
+import com.lemon.catacombs.items.melee.ButterflyKnife;
+import com.lemon.catacombs.items.melee.Daggers;
+import com.lemon.catacombs.items.melee.Screwdriver;
+import com.lemon.catacombs.items.melee.Sword;
 import com.lemon.catacombs.objects.entities.Collectable;
 import com.lemon.catacombs.objects.entities.Player;
 
-import java.awt.*;
-
 public interface Weapon {
+    static Weapon generateMelee() {
+        int type = (int) (Math.random() * 4);
+        switch (type) {
+            case 1:
+                // Knife
+                return new ButterflyKnife();
+            case 2:
+                // Sword
+                return new Sword();
+            case 3:
+                // Screwdriver
+                return new Screwdriver();
+            default:
+                // Daggers
+                return new Daggers();
+        }
+    }
+
     static Weapon generatePistol() {
         int type = (int) (Math.random() * 3);
         switch (type) {
@@ -63,7 +83,7 @@ public interface Weapon {
     }
 
     static Weapon generateWeapon() {
-        int type = (int) (Math.random() * 3);
+        int type = (int) (Math.random() * 4);
         // Will add more in future
         switch (type) {
             case 1:
@@ -72,6 +92,9 @@ public interface Weapon {
             case 2:
                 // Rifle
                 return generateRifle();
+            case 3:
+                // Melee
+                return generateMelee();
             default:
                 // Pistol
                 return generatePistol();

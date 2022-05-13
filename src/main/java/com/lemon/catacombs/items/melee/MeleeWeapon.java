@@ -117,11 +117,11 @@ public abstract class MeleeWeapon implements Weapon {
 
     @Override
     public int throwDamage() {
-        return -1;
+        return meleeDamage();
     }
 
     @Override
     public boolean breaksOnThrow() {
-        return true;
+        return false;
     }
 }

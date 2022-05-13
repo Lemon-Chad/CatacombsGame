@@ -37,9 +37,4 @@ public class Screwdriver extends MeleeWeapon {
     public int throwDamage() {
         return 750;
     }
-
-    @Override
-    public boolean breaksOnThrow() {
-        return false;
-    }
 }
