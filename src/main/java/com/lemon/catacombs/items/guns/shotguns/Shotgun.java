@@ -42,4 +42,9 @@ public abstract class Shotgun extends Gun {
     public String audioPath() {
         return "/sounds/shotgun/";
     }
+
+    @Override
+    public float getScale() {
+        return 1.23f;
+    }
 }

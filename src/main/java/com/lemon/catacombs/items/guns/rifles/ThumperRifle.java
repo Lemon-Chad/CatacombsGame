@@ -78,4 +78,9 @@ public class ThumperRifle extends Gun {
     public void stopFire() {
         firing = false;
     }
+
+    @Override
+    public float getScale() {
+        return 1.5f;
+    }
 }

@@ -86,12 +86,23 @@ public class PlayerHUD extends UIComponent {
                 g2d.drawImage(w.getSprite().getImage(), x + slotPadding, y + slotPadding, slotSize, slotSize, null);
                 g2d.dispose();
 
-                // Draw the ammo
-                g.setColor(Color.WHITE);
-                g.setFont(new Font("Arial", Font.BOLD, 15));
-                int width = g.getFontMetrics().stringWidth(w.getAmmo() + "");
-                g.drawString(w.getAmmo() + "", x + slotSize - width + slotPadding,
-                        y + slotPadding + slotSize - 5);
+                // Draw the ammo/durability
+                if (w.isMelee()) {
+                    double durability = w.getDurability();
+                    double hue = durability / 3;
+                    Color color = Color.getHSBColor((float) hue, 1, 1);
+                    int height = (int) (slotSize * durability);
+                    int barX = x + slotPadding + slotSize - 8;
+                    int barY = y + slotPadding + (slotSize - height);
+                    g.setColor(color);
+                    g.fillRect(barX, barY, 8, height);
+                } else {
+                    g.setColor(Color.WHITE);
+                    g.setFont(new Font("Arial", Font.BOLD, 15));
+                    int width = g.getFontMetrics().stringWidth(w.getAmmo() + "");
+                    g.drawString(w.getAmmo() + "", x + slotSize - width + slotPadding,
+                            y + slotPadding + slotSize - 5);
+                }
             }
 
             x += inventoryBoxSize + 10;

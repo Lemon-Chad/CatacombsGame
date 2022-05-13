@@ -14,6 +14,8 @@ import com.lemon.catacombs.items.guns.shotguns.LeverShotgun;
 import com.lemon.catacombs.objects.entities.Collectable;
 import com.lemon.catacombs.objects.entities.Player;
 
+import java.awt.*;
+
 public interface Weapon {
     static Weapon generatePistol() {
         int type = (int) (Math.random() * 3);
@@ -45,7 +47,7 @@ public interface Weapon {
     }
 
     static Weapon generateRifle() {
-        int type = (int) (Math.random() * 2);
+        int type = (int) (Math.random() * 3);
         // Will add more in future
         switch (type) {
             case 1:
@@ -92,14 +94,20 @@ public interface Weapon {
     double getLeverTurn();
 
     int meleeDamage();
+    MeleeRange meleeRange();
+    int throwDamage();
 
     boolean isDual();
     boolean isLever();
     boolean isAutomatic();
+    boolean isMelee();
+    boolean isBroken();
+    boolean breaksOnThrow();
 
     String audioPath();
 
     int getAmmo();
+    double getDurability();
 
     void tick();
     int getDamage();
@@ -112,4 +120,6 @@ public interface Weapon {
     Spriteable getSpriteable();
 
     boolean canFire();
+
+    float getScale();
 }

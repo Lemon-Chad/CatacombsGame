@@ -4,8 +4,11 @@ import com.lemon.catacombs.Utils;
 import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.render.Sprite;
 import com.lemon.catacombs.engine.render.Spriteable;
+import com.lemon.catacombs.items.MeleeRange;
 import com.lemon.catacombs.items.Weapon;
 import com.lemon.catacombs.objects.entities.Player;
+
+import java.awt.*;
 
 public abstract class Gun implements Weapon {
     protected int damage;
@@ -95,6 +98,21 @@ public abstract class Gun implements Weapon {
         return 0;
     }
 
+    @Override
+    public MeleeRange meleeRange() {
+        return new MeleeRange(1, 1);
+    }
+
+    @Override
+    public double getDurability() {
+        return 1;
+    }
+
+    @Override
+    public boolean isMelee() {
+        return false;
+    }
+
     public int getFireRate() {
         return fireRate;
     }
@@ -106,5 +124,25 @@ public abstract class Gun implements Weapon {
 
     public boolean canFire() {
         return cooldown <= 0 && ammo > 0;
+    }
+
+    @Override
+    public float getScale() {
+        return 1;
+    }
+
+    @Override
+    public boolean isBroken() {
+        return false;
+    }
+
+    @Override
+    public int throwDamage() {
+        return -1;
+    }
+
+    @Override
+    public boolean breaksOnThrow() {
+        return true;
     }
 }

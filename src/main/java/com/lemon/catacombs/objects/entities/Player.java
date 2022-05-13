@@ -4,11 +4,15 @@ import com.lemon.catacombs.Utils;
 import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.input.MouseEvents;
 import com.lemon.catacombs.engine.physics.GameObject;
+import com.lemon.catacombs.items.MeleeRange;
 import com.lemon.catacombs.items.guns.shotguns.Shotgun;
 import com.lemon.catacombs.items.Weapon;
+import com.lemon.catacombs.items.melee.MeleeWeapon;
 import com.lemon.catacombs.objects.ID;
 import com.lemon.catacombs.objects.Layers;
 import com.lemon.catacombs.objects.entities.enemies.Enemy;
+import com.lemon.catacombs.objects.particles.Particle;
+import com.lemon.catacombs.objects.particles.PickupParticle;
 import com.lemon.catacombs.objects.projectiles.Bullet;
 import com.lemon.catacombs.objects.projectiles.PlayerBullet;
 import com.lemon.catacombs.objects.projectiles.ThrownLeverShotgun;
@@ -23,7 +27,6 @@ import java.awt.image.BufferedImage;
 public class Player extends Damageable {
 
     private boolean up = false, down = false, left = false, right = false;
-    private boolean dash = false;
 
     private boolean moving;
 
@@ -261,10 +264,10 @@ public class Player extends Damageable {
         // Render hands
         g.setColor(getHandColor());
         if (equipped != null) {
-            drawWeapon(g, x + 8 + rightHand.x - (int) getVelX(), y - 8 + rightHand.y - (int) getVelY());
+            drawWeapon(g, x + 8 + rightHand.x - (int) getVelX(), y + rightHand.y - (int) getVelY());
 
             if (equipped.isDual()) {
-                drawWeapon(g, x + 8 + leftHand.x - (int) getVelX(), y - 8 + leftHand.y - (int) getVelY());
+                drawWeapon(g, x + 8 + leftHand.x - (int) getVelX(), y + leftHand.y - (int) getVelY());
             } else {
                 g.fillRect(x + 8 + leftHand.x - (int) getVelX(), y + 8 + leftHand.y - (int) getVelY(), 16, 16);
             }
@@ -297,21 +300,24 @@ public class Player extends Damageable {
 
         // Rotate image
         Point crosshairPosition = crosshairPosition(64);
-        double angle = Math.atan2(crosshairPosition.y - yPos, crosshairPosition.x - xPos);
-        boolean flip = Math.floor(angle / Math.PI + 0.5) != 0;
+        double angle = equipped.isMelee() ? crosshair() : Math.atan2(crosshairPosition.y - yPos, crosshairPosition.x - xPos);
+        boolean flip = Math.floor(angle / Math.PI + 0.5) != 0 && !equipped.isMelee();
         if (flip) angle += Math.PI;
-        int flipX = flip ? -1 : 1;
+        if (equipped.isMelee()) angle += Math.PI / 2;
+        int flipX = flip? -1 : 1;
 
         int width = (int) (sprite.getWidth() * 1.5);
         int height = (int) (sprite.getHeight() * 1.5);
-        BufferedImage rotated = new BufferedImage(width, height, sprite.getType());
+        int swidth = (int) (width * equipped.getScale());
+        int sheight = (int) (height * equipped.getScale());
+        BufferedImage rotated = new BufferedImage(swidth + 20, sheight + 20, sprite.getType());
 
         Graphics2D g2d = rotated.createGraphics();
-        g2d.rotate(angle + equipped.getLeverTurn(), width / 2f, height / 2f);
-        g2d.drawImage(sprite, flip ? width : 0, 0, width * flipX, height, null);
+        g2d.rotate(angle + equipped.getLeverTurn(), swidth / 2f + 10, sheight / 2f + 10);
+        g2d.drawImage(sprite, 10 + (flip ? swidth : 0), 10, swidth * flipX, sheight, null);
         g2d.dispose();
 
-        g.drawImage(rotated, xPos, yPos, null);
+        g.drawImage(rotated, xPos - (swidth - width) / 2 - 20, yPos - (sheight - height) / 2 - 20, null);
     }
 
     @Override
@@ -321,7 +327,7 @@ public class Player extends Damageable {
 
     private void fireWeapon(MouseEvent e) {
         if (e.getButton() == MouseEvent.BUTTON1) {
-            if (equipped != null) {
+            if (equipped != null && !equipped.isMelee()) {
                 if (equipped.getAmmo() == 0) {
                     Game.playSound(equipped.audioPath() + "empty" + (int) Utils.range(1, 3) + ".wav");
                     return;
@@ -349,8 +355,10 @@ public class Player extends Damageable {
         if (equipped == null) return;
         double throwAngle = crosshair();
         if (equipped.isDual()) {
-            ThrownWeapon left = new ThrownWeapon(equipped.getSprite(), x + 16, y + 16, throwAngle - 0.2);
-            ThrownWeapon right = new ThrownWeapon(equipped.getSprite(), x + 16, y + 16, throwAngle + 0.2);
+            ThrownWeapon left = new ThrownWeapon(equipped.getSprite(), x + 16, y + 16, throwAngle - 0.2,
+                    equipped.throwDamage(), equipped.breaksOnThrow());
+            ThrownWeapon right = new ThrownWeapon(equipped.getSprite(), x + 16, y + 16, throwAngle + 0.2,
+                    equipped.throwDamage(), equipped.breaksOnThrow());
 
             Game.getInstance().getWorld().addObject(left);
             Game.getInstance().getWorld().addObject(right);
@@ -359,7 +367,8 @@ public class Player extends Damageable {
             ThrownLeverShotgun leverShotgun = new ThrownLeverShotgun(shotgun, x + 16, y + 16, throwAngle);
             Game.getInstance().getWorld().addObject(leverShotgun);
         } else {
-            ThrownWeapon thrown = new ThrownWeapon(equipped.getSprite(), x + 16, y + 16, throwAngle);
+            ThrownWeapon thrown = new ThrownWeapon(equipped.getSprite(), x + 16, y + 16, throwAngle,
+                    equipped.throwDamage(), equipped.breaksOnThrow());
             Game.getInstance().getWorld().addObject(thrown);
         }
         weapons[currentWeapon] = null;
@@ -386,20 +395,36 @@ public class Player extends Damageable {
     }
 
     private void punch() {
-        boolean left = Math.random() > 0.5;
+        if (equipped != null && equipped.isMelee() && !equipped.isBroken()) {
+            MeleeWeapon melee = (MeleeWeapon) equipped;
+            melee.damage(1);
+        }
+        boolean left = Math.random() > 0.5 && (equipped == null || (!equipped.isMelee() || equipped.isDual()));
         Point hand = left ? leftHand : rightHand;
         double angle = crosshair();
         Point location = new Point((int)(Math.cos(angle) * 32), (int)(Math.sin(angle) * 32));
         Game.getInstance().getWorld().addObject(new Punch(x + 8 + location.x, y + 8 + location.y));
         hand.x = location.x;
         hand.y = location.y;
+        if (equipped != null && equipped.isBroken()) {
+            weapons[currentWeapon] = null;
+            swapWeapons(currentWeapon);
+            Game.getInstance().getAudioHandler().playSound("/sounds/break.wav");
+            breakParticles(x + hand.x + 8, y  + hand.y + 8);
+        }
+    }
+
+    private void breakParticles(int x, int y) {
+        for (int i = 0; i < Utils.range(5, 15); i++) {
+            Particle particle = new PickupParticle(x, y);
+            Game.getInstance().getWorld().addObject(particle);
+        }
     }
 
     public Bullet shoot(float speed, int damage, double bloom, Bullet bullet) {
         double angle = crosshair() + Math.random() * bloom - bloom / 2;
         float velX = (float) Math.cos(angle) * speed;
         float velY = (float) Math.sin(angle) * speed;
-        System.out.println(velX + " " + velY);
         bullet.setVelX(velX);
         bullet.setVelY(velY);
         bullet.setDamage(damage);
@@ -452,13 +477,18 @@ public class Player extends Damageable {
 
     private class Punch extends GameObject {
         private final int damage;
+        private final MeleeRange range;
+        private final double angle;
         private int life = 2;
 
         public Punch(int x, int y) {
             super(x, y, ID.PlayerProjectile);
             addCollisionLayer(Layers.PLAYER_PROJECTILES);
             addCollisionMask(Layers.ENEMY);
-            damage = (equipped == null || equipped.meleeDamage() == 0) ? 30 : equipped.meleeDamage();
+            damage = (equipped == null || equipped.meleeDamage() == 0) ? 20 : equipped.meleeDamage();
+            MeleeRange unshiftedRange = (equipped == null ? new MeleeRange(1, 1) : equipped.meleeRange());
+            range = new MeleeRange(unshiftedRange.getWidth() * 32, unshiftedRange.getHeight() * 32);
+            angle = crosshair();
         }
 
         @Override
@@ -469,11 +499,38 @@ public class Player extends Damageable {
         }
 
         @Override
-        public void render(Graphics g) {}
+        public int getYSort() {
+            return 99999;
+        }
+
+        @Override
+        public void render(Graphics g) {
+            g.setColor(Color.RED);
+            Polygon shape = getShape();
+            g.drawPolygon(shape);
+        }
+
+        private Polygon getShape() {
+            Point origin = new Point(x + 8, y + 8);
+            Point A = new Point(origin.x, origin.y - (int) (range.getHeight() / 2));
+            Point B = new Point(origin.x + (int) range.getWidth(), origin.y - (int) (range.getHeight() / 2));
+            Point C = new Point(origin.x + (int) range.getWidth(), origin.y + (int) (range.getHeight() / 2));
+            Point D = new Point(origin.x, origin.y + (int) (range.getHeight() / 2));
+            A = Utils.rotate(A, angle, origin);
+            B = Utils.rotate(B, angle, origin);
+            C = Utils.rotate(C, angle, origin);
+            D = Utils.rotate(D, angle, origin);
+            return new Polygon(new int[] {A.x, B.x, C.x, D.x}, new int[] {A.y, B.y, C.y, D.y}, 4);
+        }
 
         @Override
         public Rectangle getBounds() {
-            return new Rectangle(x - 8, y - 8, 32, 32);
+            return new Rectangle(x, y, 0, 0);
+        }
+
+        @Override
+        public boolean collidesWith(GameObject o) {
+            return getShape().intersects(o.getBounds());
         }
 
         @Override

@@ -3,6 +3,8 @@ package com.lemon.catacombs;
 import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.objects.particles.BloodParticle;
 
+import java.awt.*;
+
 public class Utils {
     public static double approachZero(double n, double dn) {
         return Math.max(0, Math.abs(n) - dn) * Math.signum(n);
@@ -34,5 +36,18 @@ public class Utils {
 
     public static double range(double min, double max) {
         return Math.random() * (max - min) + min;
+    }
+
+    public static Point rotate(Point p, double angle) {
+        double x = p.x * Math.cos(angle) - p.y * Math.sin(angle);
+        double y = p.x * Math.sin(angle) + p.y * Math.cos(angle);
+        return new Point((int) x, (int) y);
+    }
+
+    public static Point rotate(Point p, double angle, Point origin) {
+        p.translate(-origin.x, -origin.y);
+        p = rotate(p, angle);
+        p.translate(origin.x, origin.y);
+        return p;
     }
 }

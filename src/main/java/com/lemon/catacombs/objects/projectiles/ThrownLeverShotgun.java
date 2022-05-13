@@ -13,7 +13,7 @@ public class ThrownLeverShotgun extends ThrownWeapon {
     private float rotations;
 
     public ThrownLeverShotgun(Shotgun shotgun, int x, int y, double throwAngle) {
-        super(shotgun.getSprite(), x, y, throwAngle);
+        super(shotgun.getSprite(), x, y, throwAngle, shotgun.throwDamage(), shotgun.breaksOnThrow());
         weapon = shotgun;
         ammo = shotgun.getAmmo();
         cooldown = 10;

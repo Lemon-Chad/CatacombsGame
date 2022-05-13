@@ -1,7 +1,5 @@
 package com.lemon.catacombs.objects.projectiles;
 
-import com.lemon.catacombs.Utils;
-import com.lemon.catacombs.engine.AudioHandler;
 import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.physics.GameObject;
 import com.lemon.catacombs.engine.render.Sprite;
@@ -13,14 +11,16 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class ThrownWeapon extends GameObject {
-    private double spin;
     private final Sprite sprite;
     private final int width;
     private final int height;
     private final int sound;
+    private final int damage;
+    private final boolean breaks;
+    private double spin;
     private int life = 80;
 
-    public ThrownWeapon(Sprite sprite, int x, int y, double throwAngle) {
+    public ThrownWeapon(Sprite sprite, int x, int y, double throwAngle, int damage, boolean breaks) {
         super(x, y, ID.PlayerProjectile);
         this.spin = Math.random();
         this.sprite = sprite;
@@ -32,6 +32,8 @@ public class ThrownWeapon extends GameObject {
         addCollisionMask(Layers.ENEMY);
         addCollisionLayer(Layers.PLAYER_PROJECTILES);
         sound = Game.playSound("/sounds/throw.wav", 1f, true);
+        this.damage = damage;
+        this.breaks = breaks;
     }
 
     @Override
@@ -53,7 +55,6 @@ public class ThrownWeapon extends GameObject {
     public void render(Graphics g) {
         BufferedImage sprite = this.sprite.getImage();
 
-
         BufferedImage rotated = new BufferedImage(width, height, sprite.getType());
 
         Graphics2D g2d = rotated.createGraphics();
@@ -74,7 +75,8 @@ public class ThrownWeapon extends GameObject {
         if (other.getId() == ID.Enemy) {
             Enemy enemy = (Enemy) other;
             enemy.cancelLoot();
-            enemy.damage(250, this);
+            enemy.damage(damage == -1 ? 150 : damage, this);
+            if (!breaks) return;
         }
         destroy();
     }
