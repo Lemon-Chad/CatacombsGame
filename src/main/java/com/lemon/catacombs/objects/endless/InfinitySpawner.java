@@ -77,7 +77,7 @@ public class InfinitySpawner extends GameObject {
 
     @Override
     public Rectangle getBounds() {
-        return null;
+        return new Rectangle(0, 0, 0, 0);
     }
 
     @Override

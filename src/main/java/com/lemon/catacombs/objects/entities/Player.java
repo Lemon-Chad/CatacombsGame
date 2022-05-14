@@ -525,7 +525,7 @@ public class Player extends Damageable {
 
         @Override
         public Rectangle getBounds() {
-            return new Rectangle(x, y, 0, 0);
+            return getShape().getBounds();
         }
 
         @Override

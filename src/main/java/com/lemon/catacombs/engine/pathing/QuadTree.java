@@ -4,11 +4,9 @@ import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.physics.CollisionLayer;
 import com.lemon.catacombs.engine.physics.GameObject;
 import org.jetbrains.annotations.NotNull;
-import org.w3c.dom.css.Rect;
 
 import java.awt.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class QuadTree {
     public static int INNOVATION = 0;
@@ -188,7 +186,11 @@ public class QuadTree {
     }
 
     public Set<GameObject> getObjects() {
-        return nodes.stream().map(Node::getValue).collect(Collectors.toSet());
+        Set<GameObject> objects = new HashSet<>();
+        for (Node node : nodes) {
+            objects.add(node.getValue());
+        }
+        return objects;
     }
 
     public Set<QuadTree> getTrees(Rectangle rect) {
@@ -228,12 +230,11 @@ public class QuadTree {
         for (int layer : collisionMask) {
             CollisionLayer collisionLayer = Game.getInstance().getWorld().getLayer(layer);
             if (collisionLayer != null) {
-                objects.addAll(collisionLayer.getObjects());
-            }
-        }
-        for (GameObject object : objects) {
-            if (quadTree.getBounds().intersects(object.getBounds())) {
-                quadTree.insert(object);
+                for (GameObject object : collisionLayer.getObjects()) {
+                    if (objects.contains(object)) continue;
+                    quadTree.insert(object);
+                    objects.add(object);
+                }
             }
         }
 

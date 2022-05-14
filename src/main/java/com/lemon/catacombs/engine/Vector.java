@@ -33,15 +33,31 @@ public class Vector {
         return Math.sqrt(x * x + y * y);
     }
 
+    public double invLength() {
+        float length = (float) (x * x + y * y);
+        int i;
+        float x2, y;
+        final float threehalfs = 1.5F;
+
+        x2 = length * 0.5F;
+        y = length;
+        i = Float.floatToIntBits(y);
+        i = 0x5f3759df - (i >> 1);
+        y = Float.intBitsToFloat(i);
+        y = y * (threehalfs - (x2 * y * y));
+
+        return y;
+    }
+
     public Vector normalize() {
-        return div(length());
+        return mul(invLength());
     }
 
     public Vector normalize(double length) {
-        if (length() < length) {
+        if (x * x + y * y < length * length) {
             return this;
         }
-        return div(length()).mul(length);
+        return normalize().mul(length);
     }
 
     public Vector rotate(double angle) {

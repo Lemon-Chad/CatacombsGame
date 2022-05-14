@@ -15,6 +15,7 @@ abstract public class GameObject implements YSortable {
     private final Set<Integer> collisionLayer;
     private final Set<Integer> collisionMask;
     private final Set<Effect> effects;
+    private boolean affected;
 
     public GameObject(int x, int y, int id) {
         this.x = x;
@@ -58,14 +59,19 @@ abstract public class GameObject implements YSortable {
 
     public void addEffect(EffectListener effect, int duration) {
         effects.add(new Effect(effect, duration));
+        affected = true;
     }
 
     public void tick() {
-        Set<Effect> toRemove = new HashSet<>();
-        for (Effect effect : effects) {
-            if (effect.update()) toRemove.add(effect);
+        if (affected) {
+            Set<Effect> toRemove = new HashSet<>();
+            for (Effect effect : effects) {
+                if (effect.update())
+                    toRemove.add(effect);
+            }
+            effects.removeAll(toRemove);
+            affected = !effects.isEmpty();
         }
-        effects.removeAll(toRemove);
     }
     public abstract void render(Graphics g);
     public abstract Rectangle getBounds();
