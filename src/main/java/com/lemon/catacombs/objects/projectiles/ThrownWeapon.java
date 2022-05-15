@@ -53,6 +53,7 @@ public class ThrownWeapon extends GameObject {
     @SuppressWarnings("DuplicatedCode")
     @Override
     public void render(Graphics g) {
+        super.render(g);
         BufferedImage sprite = this.sprite.getImage();
 
         Graphics2D g2d = (Graphics2D) g.create();

@@ -13,6 +13,7 @@ import com.lemon.catacombs.objects.projectiles.PlayerBullet;
 import java.awt.*;
 
 public class FrostbiteRifle extends Gun {
+    private static final int FROZEN_STATE = Enemy.State.newState();
     private static final Sprite sprite = Sprite.LoadSprite("/sprites/guns/sniper.png");
     private boolean shooting;
     /*

@@ -85,7 +85,9 @@ public class Explosion extends GameObject {
     }
 
     @Override
-    public void render(Graphics g) {}
+    public void render(Graphics g) {
+        super.render(g);
+    }
 
     @Override
     public Rectangle getBounds() {

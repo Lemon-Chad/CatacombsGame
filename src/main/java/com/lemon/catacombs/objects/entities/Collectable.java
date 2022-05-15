@@ -57,6 +57,7 @@ public class Collectable extends GameObject {
 
     @Override
     public void render(Graphics g) {
+        super.render(g);
         float alpha = Math.min(1, 2 * (float) life / (float) maxLife);
         AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
 

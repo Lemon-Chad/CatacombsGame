@@ -1,7 +1,6 @@
 package com.lemon.catacombs.objects.entities.enemies;
 
 import com.lemon.catacombs.Utils;
-import com.lemon.catacombs.engine.AudioHandler;
 import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.Vector;
 import com.lemon.catacombs.engine.physics.GameObject;
@@ -10,13 +9,11 @@ import com.lemon.catacombs.items.Weapon;
 import com.lemon.catacombs.objects.ID;
 import com.lemon.catacombs.objects.Layers;
 import com.lemon.catacombs.objects.entities.Collectable;
-import com.lemon.catacombs.objects.entities.Damageable;
 import com.lemon.catacombs.objects.entities.PathingObject;
 import com.lemon.catacombs.objects.entities.Player;
 import com.lemon.catacombs.objects.projectiles.Bullet;
 import com.lemon.catacombs.objects.projectiles.EnemyBullet;
 import com.lemon.catacombs.objects.ui.DMGNumber;
-import com.lemon.catacombs.ui.PlayerHUD;
 import com.lemon.catacombs.ui.Stats;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,7 +24,7 @@ public abstract class Enemy extends PathingObject {
     private int stateDuration;
     private double launchAngle;
     private double evadeAngle;
-    private State state = State.CHASE;
+    private int state = State.CHASE;
     private boolean cancelLoot = false;
 
     public Enemy(int x, int y, int health) {
@@ -42,11 +39,25 @@ public abstract class Enemy extends PathingObject {
         addCollisionLayer(Layers.ENEMY);
     }
 
-    public enum State {
-        CHASE, STUN, EVADE
+    public void setState(int state, int duration) {
+        state(state, duration);
     }
 
-    public State getState() {
+    public static class State {
+        private static int states = 0;
+
+        public static final int CHASE = newState();
+        public static final int EVADE = newState();
+        public static final int STUN = newState();
+
+        private static final int MAX_STATE = states;
+
+        public static int newState() {
+            return states++;
+        }
+    }
+
+    public int getState() {
         return state;
     }
 
@@ -79,30 +90,22 @@ public abstract class Enemy extends PathingObject {
         }
 
         stateDuration--;
-        switch (state) {
-            case CHASE: {
-                Vector pathVelocity = path(maxDepth, stepSize, getSpeed());
-                setVelX((float) pathVelocity.x);
-                setVelY((float) pathVelocity.y);
-                break;
+        if (state == State.CHASE) {
+            Vector pathVelocity = path(maxDepth, stepSize, getSpeed());
+            setVelX((float) pathVelocity.x);
+            setVelY((float) pathVelocity.y);
+        } else if (state == State.EVADE) {
+            if (stateDuration <= 0) {
+                state = State.CHASE;
             }
-
-            case STUN: {
-                if (stateDuration <= 0) {
-                    state = State.CHASE;
-                }
-                setVelX((float) Math.cos(launchAngle));
-                setVelY((float) Math.sin(launchAngle));
-                break;
+            setVelX(15 * (float) Math.cos(evadeAngle));
+            setVelY(15 * (float) Math.sin(evadeAngle));
+        } else if (state == State.STUN) {
+            if (stateDuration <= 0) {
+                state = State.CHASE;
             }
-
-            case EVADE: {
-                if (stateDuration <= 0) {
-                    state = State.CHASE;
-                }
-                setVelX(15 * (float) Math.cos(evadeAngle));
-                setVelY(15 * (float) Math.sin(evadeAngle));
-            }
+            setVelX((float) Math.cos(launchAngle));
+            setVelY((float) Math.sin(launchAngle));
         }
     }
 
@@ -205,9 +208,6 @@ public abstract class Enemy extends PathingObject {
     }
 
     @Override
-    public abstract void render(Graphics g);
-
-    @Override
     public abstract Rectangle getBounds();
 
     protected abstract void onPlayerHit(Player player);
@@ -216,7 +216,7 @@ public abstract class Enemy extends PathingObject {
         this.evadeAngle = evadeAngle;
     }
 
-    protected void state(State state, int duration) {
+    protected void state(int state, int duration) {
         this.state = state;
         this.stateDuration = duration;
     }

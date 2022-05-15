@@ -96,6 +96,7 @@ abstract public class PathingObject extends Damageable {
 
     @Override
     public void render(Graphics g) {
+        super.render(g);
         if (visualize) {
             if (path != null) {
                 g.setColor(new Color(0, 255, 0, 100));

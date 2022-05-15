@@ -49,12 +49,17 @@ abstract public class GameObject implements YSortable {
             }
             return false;
         }
+
+        public void render(Graphics g) {
+            listener.drawEffect(GameObject.this, g);
+        }
     }
 
     public interface EffectListener {
         void onEffectStart(GameObject gameObject);
         void onEffect(GameObject object);
         void onEffectEnd(GameObject gameObject);
+        void drawEffect(GameObject object, Graphics g);
     }
 
     public void addEffect(EffectListener effect, int duration) {
@@ -73,7 +78,12 @@ abstract public class GameObject implements YSortable {
             affected = !effects.isEmpty();
         }
     }
-    public abstract void render(Graphics g);
+
+    public void render(Graphics g) {
+        for (Effect effect : effects) {
+            effect.render(g);
+        }
+    }
     public abstract Rectangle getBounds();
 
     public int getX() {

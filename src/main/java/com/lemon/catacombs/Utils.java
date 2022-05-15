@@ -4,6 +4,7 @@ import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.objects.particles.BloodParticle;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public class Utils {
     public static double approachZero(double n, double dn) {
@@ -49,5 +50,28 @@ public class Utils {
         p = rotate(p, angle);
         p.translate(origin.x, origin.y);
         return p;
+    }
+
+    public static BufferedImage scale(BufferedImage img, int width, int height) {
+        BufferedImage scaled = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = scaled.createGraphics();
+        g.drawImage(img, 0, 0, width, height, null);
+        g.dispose();
+        return scaled;
+    }
+
+    public static BufferedImage flash(BufferedImage img) {
+        return flash(img, 255, 255, 255, 255);
+    }
+
+    public static BufferedImage flash(BufferedImage img, int r, int g, int b, int a) {
+        BufferedImage flash = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = flash.createGraphics();
+        g2d.drawImage(img, 0, 0, null);
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 1f));
+        g2d.setColor(new Color(r, g, b, a));
+        g2d.fillRect(0, 0, img.getWidth(), img.getHeight());
+        g2d.dispose();
+        return flash;
     }
 }

@@ -72,7 +72,7 @@ public class InfinitySpawner extends GameObject {
 
     @Override
     public void render(Graphics g) {
-
+        super.render(g);
     }
 
     @Override

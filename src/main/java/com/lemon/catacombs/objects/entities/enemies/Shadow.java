@@ -40,6 +40,7 @@ public class Shadow extends Enemy {
 
     @Override
     public void render(Graphics g) {
+        super.render(g);
         Color c = getColor(new Color(75, 0, 120));
         g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha() / 2));
         g.fillRect(x, y, 32, 32);

@@ -104,6 +104,7 @@ public class TileSet {
 
         @Override
         public void render(Graphics g) {
+            super.render(g);
             tile.render(g, x, y, tileWidth, tileHeight);
         }
 

@@ -68,6 +68,7 @@ public class Hunter extends Enemy {
 
     @Override
     public void render(Graphics g) {
+        super.render(g);
         g.setColor(getColor(Color.RED));
         g.fillRect(x, y, 32, 32);
     }

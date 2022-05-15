@@ -12,6 +12,7 @@ public class Block extends GameObject {
 
     @Override
     public void render(Graphics g) {
+        super.render(g);
         g.setColor(new Color(200, 200, 200, 100));
         g.fillRect(x, y, 32, 32);
     }

@@ -81,6 +81,11 @@ public class Web extends Bullet {
 
             @Override
             public void onEffectEnd(GameObject gameObject) {}
+
+            @Override
+            public void drawEffect(GameObject object, Graphics g) {
+
+            }
         }, 1);
     }
 }

@@ -28,6 +28,7 @@ public class Vessel extends Enemy {
 
     @Override
     public void render(Graphics g) {
+        super.render(g);
         g.setColor(getColor(Color.YELLOW));
         g.fillRect(x, y, 32, 32);
     }

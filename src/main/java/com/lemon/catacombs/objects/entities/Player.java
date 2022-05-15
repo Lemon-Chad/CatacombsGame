@@ -4,6 +4,10 @@ import com.lemon.catacombs.Utils;
 import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.input.MouseEvents;
 import com.lemon.catacombs.engine.physics.GameObject;
+import com.lemon.catacombs.engine.render.Animation;
+import com.lemon.catacombs.engine.render.AnimationSpace;
+import com.lemon.catacombs.engine.render.BlendSpace;
+import com.lemon.catacombs.engine.render.Sprite;
 import com.lemon.catacombs.items.MeleeRange;
 import com.lemon.catacombs.items.guns.shotguns.Shotgun;
 import com.lemon.catacombs.items.Weapon;
@@ -30,7 +34,7 @@ public class Player extends Damageable {
 
     private boolean moving;
 
-    private static final double JUMP_SPEED = 0.1f;
+    private static final double JUMP_SPEED = 0.07f;
 
     private int prejump;
     private double jump;
@@ -56,6 +60,10 @@ public class Player extends Damageable {
     private Weapon equipped = weapons[currentWeapon];
 
     private int interacting = 0;
+
+    private final AnimationSpace idleSpace;
+    private final AnimationSpace walkSpace;
+    private final BlendSpace<String> directions;
 
     public Player(int x, int y) {
         super(x, y, ID.Player, new int[]{ ID.Block }, 100);
@@ -88,6 +96,34 @@ public class Player extends Damageable {
         Game.onMouseEvent(MouseEvents.MouseReleased, this::mouseReleased);
 
         Game.onKeyPressed(KeyEvent.VK_F, this::throwWeapon);
+
+        idleSpace = new AnimationSpace();
+        idleSpace.addAnimation("left", Animation.LoadSpriteSheet("/sprites/player/idle/left.png",
+                2, 32, 32).setSpeed(600));
+        idleSpace.addAnimation("right", Animation.LoadSpriteSheet("/sprites/player/idle/right.png",
+                2, 32, 32).setSpeed(600));
+        idleSpace.addAnimation("up", Animation.LoadSpriteSheet("/sprites/player/idle/up.png",
+                2, 32, 32).setSpeed(600));
+        idleSpace.addAnimation("down", Animation.LoadSpriteSheet("/sprites/player/idle/down.png",
+                2, 32, 32).setSpeed(600));
+
+        walkSpace = new AnimationSpace();
+        walkSpace.addAnimation("left", Animation.LoadSpriteSheet("/sprites/player/walk/left.png",
+                8, 32, 32).setSpeed(100));
+        walkSpace.addAnimation("right", Animation.LoadSpriteSheet("/sprites/player/walk/right.png",
+                8, 32, 32).setSpeed(100));
+        walkSpace.addAnimation("up", Animation.LoadSpriteSheet("/sprites/player/walk/up.png",
+                8, 32, 32).setSpeed(100));
+        walkSpace.addAnimation("down", Animation.LoadSpriteSheet("/sprites/player/walk/down.png",
+                8, 32, 32).setSpeed(100));
+
+        idleSpace.startAnimation("down");
+
+        directions = new BlendSpace<>();
+        directions.add(-1, 0, "left");
+        directions.add(1, 0, "right");
+        directions.add(0, -0.9f, "up");
+        directions.add(0, 0.9f, "down");
     }
 
     @Override
@@ -239,9 +275,7 @@ public class Player extends Damageable {
 
     private Color getColor() {
         if (getInvincibility() > 0 && getInvincibility() % 2 == 1) return Color.WHITE;
-        double health = (double) getHealth() / getMaxHealth();
-        double hue = health / 3;
-        return Color.getHSBColor((float) hue, 1, 1);
+        return Color.BLACK;
     }
 
     private Color getHandColor() {
@@ -254,31 +288,75 @@ public class Player extends Damageable {
     @Override
     public void render(Graphics g) {
         double mouseAngle = crosshair();
-        Point position = crosshairPosition(32);
+        // Update animations
+        directions.set((float) Math.cos(mouseAngle), (float) Math.sin(mouseAngle));
+        String k = directions.get();
+        idleSpace.startAnimation(k);
+        idleSpace.update();
+        walkSpace.startAnimation(k);
+        walkSpace.update();
 
-        int y = this.y - (int) (32 * getJumpArc());
+        int y = this.y - (int) (48 * getJumpArc());
 
         // Render jump shadow
         g.setColor(new Color(0, 0, 0, 100));
-        g.fillRect(x + 16 - (int) (16 * getJumpArc()), this.y + 32 - (int) (8 * getJumpArc()), (int) (32 * getJumpArc()), (int) (16 * getJumpArc()));
+        g.fillOval(x + 16 - (int) (24 * getJumpArc()), this.y + 64 - (int) (12 * getJumpArc()), (int) (48 * getJumpArc()), (int) (24 * getJumpArc()));
+
+        // Render hands if in back
+        if (k.equals("up")) {
+            drawLeftHand(g, y, 32, 0);
+            drawRightHand(g, y, -32, 0);
+        }
+        if (k.equals("right")) {
+            drawRightHand(g, y, -16, 0);
+        }
+        if (k.equals("left")) {
+            drawLeftHand(g, y, 16, 0);
+        }
+
 
         // Render body
-        g.setColor(getColor());
-        g.fillRect(x, y, 32, 32);
-        // Render hands
+        BufferedImage sprite = (moving ? walkSpace.getFrame() : idleSpace.getFrame()).getImage();
+        g.drawImage(Utils.scale(getColor() == Color.WHITE ? Utils.flash(sprite) : sprite, 128, 128), x - 48,
+                y - 48, null);
+
+        // Render hands if in front
+        if (k.equals("down")) {
+            drawLeftHand(g, y, 0, 0);
+            drawRightHand(g, y, 0, 0);
+        }
+        if (k.equals("right")) {
+            drawLeftHand(g, y, 16, 0);
+        }
+        if (k.equals("left")) {
+            drawRightHand(g, y, -16, 0);
+        }
+
+        Rectangle bounds = getBounds();
+        g.setColor(Color.RED);
+        g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
+    }
+
+    private void drawRightHand(Graphics g, int y, int xOff, int yOff) {
+        int x = this.x + xOff;
+        y += yOff;
         g.setColor(getHandColor());
         if (equipped != null) {
             drawWeapon(g, x + 8 + rightHand.x - (int) getVelX(), y + rightHand.y - (int) getVelY());
-
-            if (equipped.isDual()) {
-                drawWeapon(g, x + 8 + leftHand.x - (int) getVelX(), y + leftHand.y - (int) getVelY());
-            } else {
-                g.fillRect(x + 8 + leftHand.x - (int) getVelX(), y + 8 + leftHand.y - (int) getVelY(), 16, 16);
-            }
-        } else {
-            g.fillRect(x + 8 + rightHand.x - (int) getVelX(), y + 8 + rightHand.y - (int) getVelY(), 16, 16);
-            g.fillRect(x + 8 + leftHand.x - (int) getVelX(), y + 8 + leftHand.y - (int) getVelY(), 16, 16);
+            return;
         }
+        g.fillRect(x + 8 + rightHand.x - (int) getVelX(), y + 8 + rightHand.y - (int) getVelY(), 16, 16);
+    }
+
+    private void drawLeftHand(Graphics g, int y, int xOff, int yOff) {
+        int x = this.x + xOff;
+        y += yOff;
+        g.setColor(getHandColor());
+        if (equipped != null && equipped.isDual()) {
+            drawWeapon(g, x + 8 + leftHand.x - (int) getVelX(), y + leftHand.y - (int) getVelY());
+            return;
+        }
+        g.fillRect(x + 8 + leftHand.x - (int) getVelX(), y + 8 + leftHand.y - (int) getVelY(), 16, 16);
     }
 
     private Point crosshairPosition(double radius) {
@@ -297,13 +375,16 @@ public class Player extends Damageable {
         if (equipped.isMelee()) angle += Math.PI / 2;
         int flipX = flip? -1 : 1;
 
-        int width = (int) (sprite.getWidth() * 1.5);
-        int height = (int) (sprite.getHeight() * 1.5);
+        int width = (int) (sprite.getWidth() * 1.65);
+        int height = (int) (sprite.getHeight() * 1.65);
         int swidth = (int) (width * equipped.getScale());
         int sheight = (int) (height * equipped.getScale());
 
-        int x = xPos - (swidth - width) / 2 - 20;
-        int y = yPos - (sheight - height) / 2 - 20;
+        int xOffset = (int) (sprite.getWidth() > sprite.getHeight() ? -17.5 * (sprite.getWidth() / sprite.getHeight() - 1) : 0);
+        int yOffset = (int) (sprite.getWidth() < sprite.getHeight() ? -17.5 * (sprite.getHeight() / sprite.getWidth() - 1) : 0);
+
+        int x = xOffset + xPos - (swidth - width) / 2 - 20;
+        int y = yOffset + yPos - (sheight - height) / 2 - 20;
 
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.rotate(angle + equipped.getLeverTurn(), x + swidth / 2f + 10, y + sheight / 2f + 10);
@@ -314,7 +395,7 @@ public class Player extends Damageable {
 
     @Override
     public Rectangle getBounds() {
-        return new Rectangle(x, y, 32, 32);
+        return new Rectangle(x, y - 32, 32, 96);
     }
 
     private void fireWeapon(MouseEvent e) {
@@ -498,9 +579,7 @@ public class Player extends Damageable {
 
         @Override
         public void render(Graphics g) {
-            g.setColor(Color.RED);
-            Polygon shape = getShape();
-            g.drawPolygon(shape);
+            super.render(g);
         }
 
         private Polygon getShape() {

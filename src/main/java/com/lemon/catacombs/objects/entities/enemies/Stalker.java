@@ -18,6 +18,7 @@ public class Stalker extends Enemy {
 
     @Override
     public void render(Graphics g) {
+        super.render(g);
         g.setColor(getColor(new Color(255, 122, 0)));
         g.fillRect(x, y, 64, 64);
     }

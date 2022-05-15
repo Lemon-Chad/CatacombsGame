@@ -79,6 +79,7 @@ public abstract class Bullet extends GameObject {
 
     @Override
     public void render(Graphics g) {
+        super.render(g);
         Color color = getColor();
         g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(),
                 (int) (255 * Math.min(Math.sqrt(getVelX() * getVelX() + getVelY() * getVelY()) / 3f, 1))));

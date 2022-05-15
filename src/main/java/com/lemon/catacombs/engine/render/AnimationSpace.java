@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class AnimationSpace {
-    private Map<String, Animation> animations;
+    private final Map<String, Animation> animations;
     private String current;
     private Animation currentAnimation;
 
@@ -44,6 +44,15 @@ public class AnimationSpace {
         this.current = name;
         this.currentAnimation = this.animations.get(name);
         currentAnimation.start();
+    }
+
+    public void startAnimation(String name, int speed) {
+        if (Objects.equals(name, current)) {
+            return;
+        }
+        this.current = name;
+        this.currentAnimation = this.animations.get(name);
+        currentAnimation.start(speed);
     }
 
     public void reset() {

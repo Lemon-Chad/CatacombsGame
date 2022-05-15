@@ -52,7 +52,7 @@ public class Goliath extends Enemy {
 
     @Override
     public void render(Graphics g) {
-
+        super.render(g);
         // Health bar
         g.setColor(Color.WHITE);
         int w = 96 * getHealth() / getMaxHealth();
