@@ -213,6 +213,10 @@ public class Player extends Damageable {
         return currentWeapon;
     }
 
+    public Weapon getEquipped() {
+        return equipped;
+    }
+
     interface StaminaAction {
         void execute();
     }
@@ -271,23 +275,10 @@ public class Player extends Damageable {
             } else {
                 g.fillRect(x + 8 + leftHand.x - (int) getVelX(), y + 8 + leftHand.y - (int) getVelY(), 16, 16);
             }
-
-            // Bloom arc
-            double bloom = equipped.getBloom() * 180 / Math.PI;
-            if (bloom > 0) {
-                g.setColor(Color.WHITE);
-                // Change arc thickness based on bloom
-                Graphics2D g2 = (Graphics2D) g;
-                g2.setStroke(new BasicStroke(3));
-                g.drawArc(x - 32, y - 32, 96, 96, (int) (-mouseAngle * 180 / Math.PI - bloom / 2), (int) (bloom));
-            }
         } else {
             g.fillRect(x + 8 + rightHand.x - (int) getVelX(), y + 8 + rightHand.y - (int) getVelY(), 16, 16);
             g.fillRect(x + 8 + leftHand.x - (int) getVelX(), y + 8 + leftHand.y - (int) getVelY(), 16, 16);
         }
-        // Render crosshair
-        g.setColor(Color.WHITE);
-        g.fillOval(position.x, position.y, 8, 8);
     }
 
     private Point crosshairPosition(double radius) {
@@ -310,14 +301,15 @@ public class Player extends Damageable {
         int height = (int) (sprite.getHeight() * 1.5);
         int swidth = (int) (width * equipped.getScale());
         int sheight = (int) (height * equipped.getScale());
-        BufferedImage rotated = new BufferedImage(swidth + 20, sheight + 20, sprite.getType());
 
-        Graphics2D g2d = rotated.createGraphics();
-        g2d.rotate(angle + equipped.getLeverTurn(), swidth / 2f + 10, sheight / 2f + 10);
-        g2d.drawImage(sprite, 10 + (flip ? swidth : 0), 10, swidth * flipX, sheight, null);
+        int x = xPos - (swidth - width) / 2 - 20;
+        int y = yPos - (sheight - height) / 2 - 20;
+
+        Graphics2D g2d = (Graphics2D) g.create();
+        g2d.rotate(angle + equipped.getLeverTurn(), x + swidth / 2f + 10, y + sheight / 2f + 10);
+        g2d.drawImage(sprite, x + (flip ? swidth : 0) + 10, y + 10,
+                swidth * flipX, sheight, null);
         g2d.dispose();
-
-        g.drawImage(rotated, xPos - (swidth - width) / 2 - 20, yPos - (sheight - height) / 2 - 20, null);
     }
 
     @Override
@@ -469,10 +461,11 @@ public class Player extends Damageable {
     }
 
     @Override
-    public void damage(int damage) {
+    public boolean damage(int damage) {
         super.damage(damage);
-        if (getInvincibility() > 0) return;
+        if (getInvincibility() > 0) return false;
         Game.playSound("/sounds/hit/hit" + (int) Utils.range(1, 3) + ".wav");
+        return true;
     }
 
     private class Punch extends GameObject {

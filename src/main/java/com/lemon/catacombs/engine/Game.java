@@ -7,6 +7,7 @@ import com.lemon.catacombs.engine.physics.GameObject;
 import com.lemon.catacombs.engine.render.Camera;
 import com.lemon.catacombs.engine.render.Window;
 import com.lemon.catacombs.items.Weapon;
+import com.lemon.catacombs.items.guns.rifles.FrostbiteRifle;
 import com.lemon.catacombs.items.melee.ButterflyKnife;
 import com.lemon.catacombs.items.melee.Daggers;
 import com.lemon.catacombs.items.melee.Screwdriver;
@@ -20,6 +21,8 @@ import com.lemon.catacombs.objects.entities.enemies.Vessel;
 import com.lemon.catacombs.objects.ui.FadeIn;
 import com.lemon.catacombs.ui.MenuUI;
 import com.lemon.catacombs.ui.PlayerHUD;
+import com.lemon.catacombs.ui.Reticle;
+import com.lemon.catacombs.ui.Stats;
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,6 +30,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
+import java.nio.Buffer;
 import java.util.Set;
 
 public class Game extends Canvas implements Runnable {
@@ -52,6 +56,8 @@ public class Game extends Canvas implements Runnable {
     private Player player;
 
     public Game() {
+        hideCursor();
+
         instance = this;
         new Window(1000, 563, "Catacombs", this);
 
@@ -74,6 +80,17 @@ public class Game extends Canvas implements Runnable {
         start();
     }
 
+    public void hideCursor() {
+        BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+        Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(0, 0), "blank cursor");
+        setCursor(blankCursor);
+    }
+
+    public void showCursor() {
+        Cursor cursor = Cursor.getDefaultCursor();
+        setCursor(cursor);
+    }
+
     public static int playSound(String s) {
         return getInstance().audioHandler.playSound(s);
     }
@@ -90,8 +107,8 @@ public class Game extends Canvas implements Runnable {
         handler.clear();
         keyInput.clear();
         mouseInput.clear();
-        PlayerHUD.kills = 0;
-        PlayerHUD.damage = 0;
+        Stats.getStats().reset();
+        handler.addObject(new Reticle());
     }
 
     public void menu() {
@@ -111,7 +128,7 @@ public class Game extends Canvas implements Runnable {
         handler.addObject(new Player(0, 0));
         handler.addObject(new CheckeredBackground());
         handler.addObject(new InfinitySpawner());
-        handler.addObject(Weapon.dropWeapon(Weapon.generateWeapon(), 0, 64));
+        handler.addObject(Weapon.dropWeapon(new FrostbiteRifle(), 0, 64));
         camera.setShake(3.0f);
         camera.setShakeDecayRate(0.99f);
         camera.setZoom(2.0f);
@@ -214,6 +231,7 @@ public class Game extends Canvas implements Runnable {
         handler.tick();
         handler.collisions();
         camera.tick(player);
+        Stats.getStats().tick();
     }
 
     public void render() {

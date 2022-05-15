@@ -7,11 +7,9 @@ import com.lemon.catacombs.objects.ID;
 import com.lemon.catacombs.objects.entities.Player;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public class PlayerHUD extends UIComponent {
-    public static int kills = 0;
-    public static int damage = 0;
-    public static double metersPerSecond = 0;
     private int mpsRefresh = 8;
     private final Dimension healthBarSize;
     private final Dimension staminaBarSize;
@@ -41,20 +39,14 @@ public class PlayerHUD extends UIComponent {
     }
 
     private void renderStats(Graphics g) {
-        mpsRefresh--;
-        if (mpsRefresh <= 0) {
-            Player player = Game.getInstance().getPlayer();
-            metersPerSecond = new Point((int) player.getVelX(), (int) player.getVelY()).distance(0, 0) / 5;
-            mpsRefresh = 8;
-        }
         g.setFont(new Font("Arial", Font.BOLD, 30));
         g.setColor(Color.WHITE);
-        int width = g.getFontMetrics().stringWidth(shorten(kills) + " kills");
-        g.drawString(shorten(kills) + " kills", Game.getInstance().getWidth() - width - 10, 30);
-        width = g.getFontMetrics().stringWidth(shorten(damage) + " damage");
-        g.drawString(shorten(damage) + " damage", Game.getInstance().getWidth() - width - 10, 60);
-        width = g.getFontMetrics().stringWidth(shorten(metersPerSecond) + " m/s");
-        g.drawString(shorten(metersPerSecond) + " m/s", Game.getInstance().getWidth() - width - 10, 90);
+        int width = g.getFontMetrics().stringWidth(shorten(Stats.getStats().getKills()) + " kills");
+        g.drawString(shorten(Stats.getStats().getKills()) + " kills", Game.getInstance().getWidth() - width - 10, 30);
+        width = g.getFontMetrics().stringWidth(shorten(Stats.getStats().getDamage()) + " damage");
+        g.drawString(shorten(Stats.getStats().getDamage()) + " damage", Game.getInstance().getWidth() - width - 10, 60);
+        width = g.getFontMetrics().stringWidth(shorten(Stats.getStats().getMetersPerSecond()) + " m/s");
+        g.drawString(shorten(Stats.getStats().getMetersPerSecond()) + " m/s", Game.getInstance().getWidth() - width - 10, 90);
     }
 
     private String shorten(double number) {
@@ -80,10 +72,16 @@ public class PlayerHUD extends UIComponent {
 
             Weapon w = Game.getInstance().getPlayer().getWeapon(i);
             if (w != null) {
+                BufferedImage image = w.getSprite().getImage();
+                float scale = (float) slotSize / Math.max(image.getWidth(), image.getHeight());
+                int width = (int) (image.getWidth() * scale);
+                int height = (int) (image.getHeight() * scale);
+                int widthOffset = width < height ? (height - width) / 2 : 0;
+                int heightOffset = height < width ? (width - height) / 2 : 0;
                 // Tilt it because it's cool
                 Graphics2D g2d = (Graphics2D) g.create();
-                g2d.rotate(Math.toRadians(-22), x + slotPadding + slotSize / 2f, y + slotPadding + slotSize / 2f);
-                g2d.drawImage(w.getSprite().getImage(), x + slotPadding, y + slotPadding, slotSize, slotSize, null);
+                g2d.rotate(Math.toRadians(-22), x + slotPadding + width / 2f, y + slotPadding + height / 2f);
+                g2d.drawImage(image, x + slotPadding + widthOffset, y + slotPadding + heightOffset, width, height, null);
                 g2d.dispose();
 
                 // Draw the ammo/durability
@@ -91,16 +89,16 @@ public class PlayerHUD extends UIComponent {
                     double durability = w.getDurability();
                     double hue = durability / 3;
                     Color color = Color.getHSBColor((float) hue, 1, 1);
-                    int height = (int) (slotSize * durability);
+                    int barHeight = (int) (slotSize * durability);
                     int barX = x + slotPadding + slotSize - 8;
                     int barY = y + slotPadding + (slotSize - height);
                     g.setColor(color);
-                    g.fillRect(barX, barY, 8, height);
+                    g.fillRect(barX, barY, 8, barHeight);
                 } else {
                     g.setColor(Color.WHITE);
                     g.setFont(new Font("Arial", Font.BOLD, 15));
-                    int width = g.getFontMetrics().stringWidth(w.getAmmo() + "");
-                    g.drawString(w.getAmmo() + "", x + slotSize - width + slotPadding,
+                    int fontWidth = g.getFontMetrics().stringWidth(w.getAmmo() + "");
+                    g.drawString(w.getAmmo() + "", x + slotSize - fontWidth + slotPadding,
                             y + slotPadding + slotSize - 5);
                 }
             }

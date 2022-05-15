@@ -46,10 +46,9 @@ public class Shadow extends Enemy {
     }
 
     @Override
-    public void damage(int damage, GameObject source) {
+    public boolean damage(int damage, GameObject source) {
         if (evadeCooldown > 0) {
-            super.damage(damage, source);
-            return;
+            return super.damage(damage, source);
         }
         Point target = new Point(source.getX(), source.getY());
         double angle = Math.atan2(y - target.y, x - target.x);
@@ -58,6 +57,7 @@ public class Shadow extends Enemy {
         setEvadeAngle(angle);
         evadeCooldown = EVADE_SPEED;
         state(State.EVADE, 30);
+        return true;
     }
 
     @Override

@@ -29,9 +29,10 @@ public class EnvironmentBullet extends Bullet {
         super.collision(other);
         if (other instanceof Damageable) {
             Damageable damageable = (Damageable) other;
-            damageable.damage(getDamage(), this);
-            setVelX(getVelX() / 2);
-            setVelY(getVelY() / 2);
+            if (damageable.damage(getDamage(), this)) {
+                setVelX(getVelX() / 2);
+                setVelY(getVelY() / 2);
+            }
             return;
         }
         destroy();

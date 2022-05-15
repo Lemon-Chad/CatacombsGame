@@ -87,7 +87,13 @@ public abstract class Bullet extends GameObject {
 
     @Override
     public Rectangle getBounds() {
-        return new Rectangle(x, y, getSize(), getSize());
+        int fx = (int) (x + getVelX());
+        int fy = (int) (y + getVelY());
+        int w = Math.abs(fx - x);
+        int h = Math.abs(fy - y);
+        int x = Math.min(fx, this.x);
+        int y = Math.min(fy, this.y);
+        return new Rectangle(x, y, w, h);
     }
 
     @Override
@@ -95,6 +101,10 @@ public abstract class Bullet extends GameObject {
         for (ImpactEffect effect : impactEffects) {
             effect.apply(this, other);
         }
+    }
+
+    protected Set<ImpactEffect> getImpactEffects() {
+        return impactEffects;
     }
 
     public void setDamage(int damage) {

@@ -17,6 +17,7 @@ import com.lemon.catacombs.objects.projectiles.Bullet;
 import com.lemon.catacombs.objects.projectiles.EnemyBullet;
 import com.lemon.catacombs.objects.ui.DMGNumber;
 import com.lemon.catacombs.ui.PlayerHUD;
+import com.lemon.catacombs.ui.Stats;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
@@ -124,7 +125,7 @@ public abstract class Enemy extends PathingObject {
 
     @Override
     protected void onDeath() {
-        PlayerHUD.kills++;
+        Stats.getStats().addKills(1);
         Game.getInstance().getCamera().setShake(2f);
         destroy();
         explode();
@@ -180,7 +181,7 @@ public abstract class Enemy extends PathingObject {
     }
 
     @Override
-    public void damage(int damage) {
+    public boolean damage(int damage) {
         if (getInvincibility() <= 0) {
             if (dmgNumber == null || dmgNumber.isDead()) {
                 dmgNumber = new DMGNumber(damage, x, y, Color.RED, 32);
@@ -188,18 +189,19 @@ public abstract class Enemy extends PathingObject {
             } else {
                 dmgNumber.stack(damage, x, y);
             }
-            PlayerHUD.damage += damage;
+            Stats.getStats().addDamage(damage);
         }
-        super.damage(damage);
+        boolean a = super.damage(damage);
         stateDuration = 10;
         state = State.STUN;
+        return a;
     }
 
     @Override
-    public void damage(int damage, GameObject source) {
-        damage(damage);
+    public boolean damage(int damage, GameObject source) {
         Game.playSound("/sounds/hit/hit" + (int) (1 + Math.random() * 2) + ".wav");
         launchAngle = Math.atan2(this.y + 16 - source.getY(), this.x + 16 - source.getX());
+        return damage(damage);
     }
 
     @Override

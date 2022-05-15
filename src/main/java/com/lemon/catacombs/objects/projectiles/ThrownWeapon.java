@@ -55,14 +55,10 @@ public class ThrownWeapon extends GameObject {
     public void render(Graphics g) {
         BufferedImage sprite = this.sprite.getImage();
 
-        BufferedImage rotated = new BufferedImage(width, height, sprite.getType());
-
-        Graphics2D g2d = rotated.createGraphics();
-        g2d.rotate(spin, width / 2f, height / 2f);
-        g2d.drawImage(sprite, 0, 0, width, height, null);
+        Graphics2D g2d = (Graphics2D) g.create();
+        g2d.rotate(spin, x + width / 2f, y + height / 2f);
+        g2d.drawImage(sprite, x, y, width, height, null);
         g2d.dispose();
-
-        g.drawImage(rotated, x, y, null);
     }
 
     @Override

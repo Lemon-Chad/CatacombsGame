@@ -30,9 +30,10 @@ public class PlayerBullet extends Bullet {
         if (other.getId() == ID.Enemy) {
             Enemy enemy = (Enemy) other;
             if (enemy.getState() == Enemy.State.STUN) return;
-            enemy.damage(getDamage(), this);
-            setVelX(getVelX() / 2);
-            setVelY(getVelY() / 2);
+            if (enemy.damage(getDamage(), this)) {
+                setVelX(getVelX() / 2);
+                setVelY(getVelY() / 2);
+            }
             return;
         }
         destroy();

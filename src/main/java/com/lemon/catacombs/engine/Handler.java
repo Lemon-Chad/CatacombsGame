@@ -71,7 +71,7 @@ public class Handler {
             Set<QuadTree> trees = quadTree.getTrees(object.getBounds());
             for (QuadTree tree : trees) {
                 for (GameObject other : tree.getObjects()) {
-                    if (object != other && object.collidesWith(other)) {
+                    if (object != other && colliding(object, other)) {
                         object.collision(other);
                     }
                 }
@@ -90,12 +90,16 @@ public class Handler {
         Set<QuadTree> trees = quadTree.getTrees(location);
         for (QuadTree tree : trees) {
             for (GameObject object : tree.getObjects()) {
-                if (object != origin && object.collidesWith(origin)) {
+                if (object != origin && colliding(object, origin)) {
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    private boolean colliding(GameObject object, GameObject other) {
+        return object.collidesWith(other) || other.collidesWith(object);
     }
 
     public void render(Graphics g) {

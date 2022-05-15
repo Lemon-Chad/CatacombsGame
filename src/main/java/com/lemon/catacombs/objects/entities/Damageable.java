@@ -46,9 +46,9 @@ abstract public class Damageable extends PhysicsObject {
         invincibility = 60;
     }
 
-    public void damage(int damage) {
+    public boolean damage(int damage) {
         if (invincibility > 0) {
-            return;
+            return false;
         }
         health -= damage;
         if (health <= 0) {
@@ -56,16 +56,18 @@ abstract public class Damageable extends PhysicsObject {
         }
         invincible();
         Utils.bloodsplosion(x, y, damage, 1, 5);
+        return true;
     }
 
-    public void damage(int damage, GameObject source) {
+    public boolean damage(int damage, GameObject source) {
         if (invincibility > 0) {
-            return;
+            return false;
         }
         damage = Math.min(damage, health);
         damage(damage);
         double launchAngle = Math.atan2(this.y + 16 - source.getY(), this.x + 16 - source.getX());
         addFVel((float) Math.cos(launchAngle) * 3, (float) Math.sin(launchAngle) * 3);
+        return true;
     }
 
     public void heal(int heal) {
