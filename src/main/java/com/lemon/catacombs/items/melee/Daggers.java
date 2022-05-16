@@ -7,7 +7,7 @@ import com.lemon.catacombs.items.MeleeRange;
 import java.awt.*;
 
 public class Daggers extends MeleeWeapon {
-    private static final Sprite sprite = Sprite.LoadSprite("/sprites/melee/dagger.png");
+    private static final Sprite sprite = Sprite.LoadSprite("/sprites/melee/dagger.png").originFromUV();
     private final int damage;
 
     public Daggers() {

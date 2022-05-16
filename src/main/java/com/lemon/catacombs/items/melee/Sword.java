@@ -5,7 +5,7 @@ import com.lemon.catacombs.engine.render.Sprite;
 import com.lemon.catacombs.items.MeleeRange;
 
 public class Sword extends MeleeWeapon {
-    private static final Sprite sprite = Sprite.LoadSprite("/sprites/melee/sword.png");
+    private static final Sprite sprite = Sprite.LoadSprite("/sprites/melee/sword.png").originFromUV();
     private final int damage;
 
     public Sword() {

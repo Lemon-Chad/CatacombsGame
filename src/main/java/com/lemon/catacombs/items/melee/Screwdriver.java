@@ -5,7 +5,7 @@ import com.lemon.catacombs.engine.render.Sprite;
 import com.lemon.catacombs.items.MeleeRange;
 
 public class Screwdriver extends MeleeWeapon {
-    private static final Sprite sprite = Sprite.LoadSprite("/sprites/melee/screwdriver.png");
+    private static final Sprite sprite = Sprite.LoadSprite("/sprites/melee/screwdriver.png").originFromUV();
     private final int damage;
 
     public Screwdriver() {

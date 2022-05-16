@@ -40,6 +40,12 @@ public class Animation implements Spriteable {
         playing = false;
     }
 
+    public void originFromUV() {
+        for (Sprite frame : frames) {
+            frame.originFromUV();
+        }
+    }
+
     public void start() {
         start(speed);
     }
@@ -65,13 +71,23 @@ public class Animation implements Spriteable {
         delta += time - lastTime;
         lastTime = time;
 
-        while (delta > speed && speed > 0) {
-            currentFrame++;
-            delta -= speed;
+        while (delta > Math.abs(speed) && speed != 0) {
+            currentFrame += speed > 0 ? 1 : -1;
+            delta -= Math.abs(speed);
 
             if (currentFrame == numFrames)
                 currentFrame = 0;
+            else if (currentFrame < 0)
+                currentFrame = numFrames - 1;
         }
+    }
+
+    public void reverse() {
+        if (speed > 0) speed = -speed;
+    }
+
+    public void forwards() {
+        if (speed < 0) speed = -speed;
     }
 
     public Sprite getFrame() {
@@ -95,14 +111,12 @@ public class Animation implements Spriteable {
         BufferedImage spriteSheet = Game.loadImage(ref);
         int width = spriteSheet.getWidth();
         int height = spriteSheet.getHeight();
-        System.out.println(width + " " + height);
         Sprite[] frames = new Sprite[frameCount];
         int i = 0;
         for (int y = 0; y < height; y += frameHeight) {
             for (int x = 0; x < width; x += frameWidth) {
                 frames[i] = new Sprite(spriteSheet.getSubimage(x, y, frameWidth, frameHeight));
                 i++;
-                System.out.println(x + " " + y + " " + i);
                 if (i == frameCount)
                     return new Animation(frames);
             }

@@ -5,7 +5,7 @@ import com.lemon.catacombs.engine.render.Sprite;
 import com.lemon.catacombs.items.MeleeRange;
 
 public class ButterflyKnife extends MeleeWeapon {
-    private static final Sprite sprite = Sprite.LoadSprite("/sprites/melee/knife.png");
+    private static final Sprite sprite = Sprite.LoadSprite("/sprites/melee/knife.png").originFromUV();
     private final int damage;
 
     public ButterflyKnife() {

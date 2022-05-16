@@ -73,9 +73,11 @@ public class Pathfinder {
     }
 
     private boolean diagonalBlock(GameObject pather, Step current, Rectangle start, int x, int y, Set<Integer> mask) {
-        return blocked(pather, new Rectangle(new Point(current.location.x, current.location.y + y * stepSize), start.getSize()), mask) ||
-                blocked(pather, new Rectangle(new Point(current.location.x + x * stepSize, current.location.y), start.getSize()), mask) ||
-                blocked(pather, new Rectangle(new Point(current.location.x + x * stepSize, current.location.y + y * stepSize), start.getSize()), mask);
+        if (x != 0 && blocked(pather, new Rectangle(new Point(current.location.x + x * stepSize, current.location.y), start.getSize()), mask))
+            return true;
+        if (y != 0 && blocked(pather, new Rectangle(new Point(current.location.x, current.location.y + y * stepSize), start.getSize()), mask))
+            return true;
+        return x != 0 && y != 0 && blocked(pather, new Rectangle(new Point(current.location.x + x * stepSize, current.location.y + y * stepSize), start.getSize()), mask);
     }
 
     private int costOf(GameObject pather, Step current, Rectangle start, int x, int y) {

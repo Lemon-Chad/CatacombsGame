@@ -10,7 +10,7 @@ import com.lemon.catacombs.objects.entities.Player;
 public class MachinePistol extends Gun {
     private boolean firing = false;
     private int fireTime = 0;
-    private static final Sprite sprite = Sprite.LoadSprite("/sprites/guns/machinepistol.png");
+    private static final Sprite sprite = Sprite.LoadSprite("/sprites/guns/machinepistol.png").originFromUV();
 
     /*
     * __Machine Pistol__

@@ -13,8 +13,7 @@ import com.lemon.catacombs.objects.projectiles.PlayerBullet;
 import java.awt.*;
 
 public class FrostbiteRifle extends Gun {
-    private static final int FROZEN_STATE = Enemy.State.newState();
-    private static final Sprite sprite = Sprite.LoadSprite("/sprites/guns/sniper.png");
+    private static final Sprite sprite = Sprite.LoadSprite("/sprites/guns/sniper.png").originFromUV();
     private boolean shooting;
     /*
      * __Frostbite Rifle__
@@ -26,8 +25,8 @@ public class FrostbiteRifle extends Gun {
      * - Very high bullet speed
      */
     public FrostbiteRifle() {
-        super(50, 70, 0.1, 0.2, 40, 60,
-                0.3, 0.8, 30, 40);
+        super(50, 70, 0.03, 0.1, 10, 25,
+                1, 1.5, 30, 40);
     }
 
     @Override

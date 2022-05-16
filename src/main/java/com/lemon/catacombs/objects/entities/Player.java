@@ -2,6 +2,7 @@ package com.lemon.catacombs.objects.entities;
 
 import com.lemon.catacombs.Utils;
 import com.lemon.catacombs.engine.Game;
+import com.lemon.catacombs.engine.Vector;
 import com.lemon.catacombs.engine.input.MouseEvents;
 import com.lemon.catacombs.engine.physics.GameObject;
 import com.lemon.catacombs.engine.render.Animation;
@@ -34,7 +35,8 @@ public class Player extends Damageable {
 
     private boolean moving;
 
-    private static final double JUMP_SPEED = 0.07f;
+    private static final double JUMP_SPEED = 0.1f;
+    private static final int JUMP_HEIGHT = 32;
 
     private int prejump;
     private double jump;
@@ -285,10 +287,9 @@ public class Player extends Damageable {
                 c.getAlpha());
     }
 
-    @Override
-    public void render(Graphics g) {
+    private String updateAnimations() {
         double mouseAngle = crosshair();
-        // Update animations
+
         directions.set((float) Math.cos(mouseAngle), (float) Math.sin(mouseAngle));
         String k = directions.get();
         idleSpace.startAnimation(k);
@@ -296,7 +297,26 @@ public class Player extends Damageable {
         walkSpace.startAnimation(k);
         walkSpace.update();
 
-        int y = this.y - (int) (48 * getJumpArc());
+        Vector speed = new Vector(getVelX(), getVelY()).normalize();
+        directions.set((float) speed.x, (float) speed.y);
+        String v = directions.get();
+        if (!k.equals(v)) {
+            idleSpace.getAnimation().reverse();
+            walkSpace.getAnimation().reverse();
+        } else {
+            idleSpace.getAnimation().forwards();
+            walkSpace.getAnimation().forwards();
+        }
+
+        return k;
+    }
+
+    @Override
+    public void render(Graphics g) {
+        // Update animations
+        String k = updateAnimations();
+
+        int y = this.y - (int) (JUMP_HEIGHT * getJumpArc());
 
         // Render jump shadow
         g.setColor(new Color(0, 0, 0, 100));
@@ -304,59 +324,51 @@ public class Player extends Damageable {
 
         // Render hands if in back
         if (k.equals("up")) {
-            drawLeftHand(g, y, 32, 0);
-            drawRightHand(g, y, -32, 0);
+            drawLeftHand(g, y, 0, true);
+            drawRightHand(g, y, 0, true);
         }
         if (k.equals("right")) {
-            drawRightHand(g, y, -16, 0);
+            drawRightHand(g, y, -16, false);
         }
         if (k.equals("left")) {
-            drawLeftHand(g, y, 16, 0);
+            drawLeftHand(g, y, 16, false);
         }
 
 
         // Render body
         BufferedImage sprite = (moving ? walkSpace.getFrame() : idleSpace.getFrame()).getImage();
-        g.drawImage(Utils.scale(getColor() == Color.WHITE ? Utils.flash(sprite) : sprite, 128, 128), x - 48,
-                y - 48, null);
+        g.drawImage(Utils.scale(getColor() == Color.WHITE ? Utils.flash(sprite) : sprite, 64, 64), x - 16,
+                y - 16, null);
 
         // Render hands if in front
         if (k.equals("down")) {
-            drawLeftHand(g, y, 0, 0);
-            drawRightHand(g, y, 0, 0);
+            drawLeftHand(g, y, 0, false);
+            drawRightHand(g, y, 0, false);
         }
         if (k.equals("right")) {
-            drawLeftHand(g, y, 16, 0);
+            drawLeftHand(g, y, 16, false);
         }
         if (k.equals("left")) {
-            drawRightHand(g, y, -16, 0);
+            drawRightHand(g, y, -16, false);
         }
-
-        Rectangle bounds = getBounds();
-        g.setColor(Color.RED);
-        g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
     }
 
-    private void drawRightHand(Graphics g, int y, int xOff, int yOff) {
+    private void drawRightHand(Graphics g, int y, int xOff, boolean swapped) {
         int x = this.x + xOff;
-        y += yOff;
         g.setColor(getHandColor());
-        if (equipped != null) {
-            drawWeapon(g, x + 8 + rightHand.x - (int) getVelX(), y + rightHand.y - (int) getVelY());
-            return;
-        }
         g.fillRect(x + 8 + rightHand.x - (int) getVelX(), y + 8 + rightHand.y - (int) getVelY(), 16, 16);
+        if (equipped != null && (!swapped || equipped.isDual())) {
+            drawWeapon(g, x + 16 + rightHand.x - (int) getVelX(), y + 16 + rightHand.y - (int) getVelY());
+        }
     }
 
-    private void drawLeftHand(Graphics g, int y, int xOff, int yOff) {
+    private void drawLeftHand(Graphics g, int y, int xOff, boolean swapped) {
         int x = this.x + xOff;
-        y += yOff;
         g.setColor(getHandColor());
-        if (equipped != null && equipped.isDual()) {
-            drawWeapon(g, x + 8 + leftHand.x - (int) getVelX(), y + leftHand.y - (int) getVelY());
-            return;
-        }
         g.fillRect(x + 8 + leftHand.x - (int) getVelX(), y + 8 + leftHand.y - (int) getVelY(), 16, 16);
+        if (equipped != null && (swapped || equipped.isDual())) {
+            drawWeapon(g, x + 16 + leftHand.x - (int) getVelX(), y + 16 + leftHand.y - (int) getVelY());
+        }
     }
 
     private Point crosshairPosition(double radius) {
@@ -365,37 +377,34 @@ public class Player extends Damageable {
     }
 
     private void drawWeapon(Graphics g, int xPos, int yPos) {
-        BufferedImage sprite = equipped.getSprite().getImage();
+        Sprite sprite = equipped.getSprite();
+        BufferedImage img = sprite.getImage();
 
         // Rotate image
         Point crosshairPosition = crosshairPosition(64);
-        double angle = equipped.isMelee() ? crosshair() : Math.atan2(crosshairPosition.y - yPos, crosshairPosition.x - xPos);
+        double angle = equipped.isMelee() ? crosshair() : Math.atan2(crosshairPosition.y - yPos + 8, crosshairPosition.x - xPos + 8);
         boolean flip = Math.floor(angle / Math.PI + 0.5) != 0 && !equipped.isMelee();
         if (flip) angle += Math.PI;
         if (equipped.isMelee()) angle += Math.PI / 2;
         int flipX = flip? -1 : 1;
 
-        int width = (int) (sprite.getWidth() * 1.65);
-        int height = (int) (sprite.getHeight() * 1.65);
+        int width = (int) (img.getWidth() * 1.3);
+        int height = (int) (img.getHeight() * 1.3);
         int swidth = (int) (width * equipped.getScale());
         int sheight = (int) (height * equipped.getScale());
 
-        int xOffset = (int) (sprite.getWidth() > sprite.getHeight() ? -17.5 * (sprite.getWidth() / sprite.getHeight() - 1) : 0);
-        int yOffset = (int) (sprite.getWidth() < sprite.getHeight() ? -17.5 * (sprite.getHeight() / sprite.getWidth() - 1) : 0);
+        int originX = (int) (sprite.getOriginX() * ((float) swidth / img.getWidth()));
+        int originY = (int) (sprite.getOriginY() * ((float) sheight / img.getHeight()));
+        System.out.println(originX);
+        System.out.println(originY);
 
-        int x = xOffset + xPos - (swidth - width) / 2 - 20;
-        int y = yOffset + yPos - (sheight - height) / 2 - 20;
-
-        Graphics2D g2d = (Graphics2D) g.create();
-        g2d.rotate(angle + equipped.getLeverTurn(), x + swidth / 2f + 10, y + sheight / 2f + 10);
-        g2d.drawImage(sprite, x + (flip ? swidth : 0) + 10, y + 10,
-                swidth * flipX, sheight, null);
-        g2d.dispose();
+        sprite.render(g, xPos - flipX * originX, yPos - originY, swidth * flipX, sheight,
+                angle + equipped.getLeverTurn());
     }
 
     @Override
     public Rectangle getBounds() {
-        return new Rectangle(x, y - 32, 32, 96);
+        return new Rectangle(x - 16, y - 16, 64, 64);
     }
 
     private void fireWeapon(MouseEvent e) {
@@ -464,7 +473,7 @@ public class Player extends Damageable {
 
     @Override
     public int getYSort() {
-        return super.getYSort() + (int) (16 * getJumpArc());
+        return super.getYSort() + (int) (JUMP_HEIGHT * getJumpArc());
     }
 
     private void punch() {
@@ -490,7 +499,7 @@ public class Player extends Damageable {
     private void breakParticles(int x, int y) {
         for (int i = 0; i < Utils.range(5, 15); i++) {
             Particle particle = new PickupParticle(x, y);
-            Game.getInstance().getWorld().addObject(particle);
+            Game.getInstance().getWorld().addParticle(particle);
         }
     }
 

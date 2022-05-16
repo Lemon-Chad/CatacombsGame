@@ -7,7 +7,7 @@ import com.lemon.catacombs.items.guns.Gun;
 import com.lemon.catacombs.objects.entities.Player;
 
 public class CarbineRifle extends Gun {
-    private static final Sprite sprite = Sprite.LoadSprite("/sprites/guns/carbine.png");
+    private static final Sprite sprite = Sprite.LoadSprite("/sprites/guns/carbine.png").originFromUV();
     private boolean firing = false;
     /*
     * __Carbine Rifle__

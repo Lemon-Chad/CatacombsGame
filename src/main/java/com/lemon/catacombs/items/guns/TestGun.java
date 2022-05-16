@@ -4,7 +4,7 @@ import com.lemon.catacombs.engine.render.Sprite;
 import com.lemon.catacombs.objects.entities.Player;
 
 public class TestGun extends Gun {
-    private static final Sprite sprite = Sprite.LoadSprite("/sprites/guns/pistol.png");
+    private static final Sprite sprite = Sprite.LoadSprite("/sprites/guns/pistol.png").originFromUV();
     /*
     * __Test Gun__
     * Hell.

@@ -66,7 +66,7 @@ public class Explosion extends GameObject {
             double theta = Math.random() * 2 * Math.PI;
             int x = (int) (r * Math.cos(theta));
             int y = (int) (r * Math.sin(theta));
-            Game.getInstance().getWorld().addObject(new FireParticle(this.x + x, this.y + y));
+            Game.getInstance().getWorld().addParticle(new FireParticle(this.x + x, this.y + y));
         }
 
         Shape ellipse = new Ellipse2D.Double(x - currentRadius * 32, y - currentRadius * 32,

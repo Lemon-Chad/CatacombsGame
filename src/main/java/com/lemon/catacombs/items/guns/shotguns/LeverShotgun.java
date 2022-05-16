@@ -4,7 +4,7 @@ import com.lemon.catacombs.engine.render.Sprite;
 import com.lemon.catacombs.objects.entities.Player;
 
 public class LeverShotgun extends Shotgun {
-    private static final Sprite sprite = Sprite.LoadSprite("/sprites/guns/leveraction.png");
+    private static final Sprite sprite = Sprite.LoadSprite("/sprites/guns/leveraction.png").originFromUV();
     /*
     * __Lever Shotgun__
     * - Very high damage

@@ -4,11 +4,21 @@ import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.objects.particles.BloodParticle;
 
 import java.awt.*;
+import java.awt.color.ColorSpace;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
+import java.awt.image.ColorConvertOp;
+import java.awt.image.ColorModel;
 
 public class Utils {
     public static double approachZero(double n, double dn) {
-        return Math.max(0, Math.abs(n) - dn) * Math.signum(n);
+        if (n > 0) {
+            return Math.max(n - dn, 0);
+        } else {
+            return Math.min(n + dn, 0);
+        }
     }
 
     public static double approach(double n, double t, double dn) {
@@ -31,7 +41,7 @@ public class Utils {
             p.setVelX((float) dx);
             p.setVelY((float) dy);
 
-            Game.getInstance().getWorld().addObject(p);
+            Game.getInstance().getWorld().addParticle(p);
         }
     }
 
@@ -73,5 +83,58 @@ public class Utils {
         g2d.fillRect(0, 0, img.getWidth(), img.getHeight());
         g2d.dispose();
         return flash;
+    }
+
+    public static int hue(Color color) {
+        double r = color.getRed() / 255.0;
+        double g = color.getGreen() / 255.0;
+        double b = color.getBlue() / 255.0;
+
+        double max = Math.max(r, Math.max(g, b));
+        double min = Math.min(r, Math.min(g, b));
+
+        double h = 0;
+        if (max == min) {
+            h = 0;
+        } else if (max == r) {
+            h = 60 * (g - b) / (max - min);
+        } else if (max == g) {
+            h = 60 * (b - r) / (max - min) + 120;
+        } else if (max == b) {
+            h = 60 * (r - g) / (max - min) + 240;
+        }
+
+        h %= 360;
+
+        return (int) h;
+    }
+
+    public static BufferedImage hueShift(BufferedImage sprite, int hue) {
+        // Shift all pixels by hue
+        BufferedImage hueShifted = new BufferedImage(sprite.getWidth(), sprite.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = hueShifted.createGraphics();
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR, 0.0f));
+        g2d.fillRect(0, 0, hueShifted.getWidth(), hueShifted.getHeight());
+        for (int x = 0; x < sprite.getWidth(); x++) {
+            for (int y = 0; y < sprite.getHeight(); y++) {
+                Color c = new Color(sprite.getRGB(x, y), true);
+                float[] hsb = Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), null);
+                float newHue = (hsb[0] + hue / 360f) % 1f;
+                Color newColor = Color.getHSBColor(newHue, hsb[1], hsb[2]);
+                newColor = new Color(newColor.getRed(), newColor.getGreen(), newColor.getBlue(), c.getAlpha());
+                hueShifted.setRGB(x, y, newColor.getRGB());
+            }
+        }
+        return hueShifted;
+    }
+
+    public static BufferedImage alpha(BufferedImage img, int a) {
+        BufferedImage alpha = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = alpha.createGraphics();
+        g2d.drawImage(img, 0, 0, null);
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, a / 255f));
+        g2d.drawImage(img, 0, 0, null);
+        g2d.dispose();
+        return alpha;
     }
 }

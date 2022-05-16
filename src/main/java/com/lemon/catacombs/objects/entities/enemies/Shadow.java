@@ -39,11 +39,13 @@ public class Shadow extends Enemy {
     }
 
     @Override
-    public void render(Graphics g) {
-        super.render(g);
-        Color c = getColor(new Color(75, 0, 120));
-        g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha() / 2));
-        g.fillRect(x, y, 32, 32);
+    protected int getSize() {
+        return 32;
+    }
+
+    @Override
+    protected Color getColor() {
+        return new Color(75, 0, 120, 45);
     }
 
     @Override
@@ -62,12 +64,7 @@ public class Shadow extends Enemy {
     }
 
     @Override
-    public Rectangle getBounds() {
-        return new Rectangle(x, y, 32, 32);
-    }
-
-    @Override
     protected void onPlayerHit(Player player) {
-        player.damage(15, this);
+        player.damage(10, this);
     }
 }

@@ -1,5 +1,6 @@
 package com.lemon.catacombs.engine;
 
+import com.lemon.catacombs.Utils;
 import com.lemon.catacombs.engine.input.KeyInput;
 import com.lemon.catacombs.engine.input.MouseEvents;
 import com.lemon.catacombs.engine.input.MouseInput;
@@ -8,15 +9,10 @@ import com.lemon.catacombs.engine.render.Camera;
 import com.lemon.catacombs.engine.render.Window;
 import com.lemon.catacombs.items.Weapon;
 import com.lemon.catacombs.items.guns.rifles.FrostbiteRifle;
-import com.lemon.catacombs.items.melee.ButterflyKnife;
-import com.lemon.catacombs.items.melee.Daggers;
-import com.lemon.catacombs.items.melee.Screwdriver;
-import com.lemon.catacombs.items.melee.Sword;
 import com.lemon.catacombs.objects.Block;
 import com.lemon.catacombs.objects.endless.CheckeredBackground;
 import com.lemon.catacombs.objects.endless.InfinitySpawner;
 import com.lemon.catacombs.objects.entities.Player;
-import com.lemon.catacombs.objects.entities.enemies.Goliath;
 import com.lemon.catacombs.objects.entities.enemies.Vessel;
 import com.lemon.catacombs.objects.ui.FadeIn;
 import com.lemon.catacombs.ui.MenuUI;
@@ -30,7 +26,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
-import java.nio.Buffer;
 import java.util.Set;
 
 public class Game extends Canvas implements Runnable {
@@ -144,7 +139,9 @@ public class Game extends Canvas implements Runnable {
         ui();
         handler.addObject(new Player(0, 0));
         handler.addObject(new CheckeredBackground());
-        handler.addObject(new Goliath(0, 500));
+        for (int i = 0; i < 50; i++) {
+            handler.addObject(new Vessel(0, 0));
+        }
         weaponSpawn();
     }
 

@@ -12,10 +12,10 @@ public class QuadTree {
     public static int INNOVATION = 0;
 
     private static class QuadTreeData {
-        private final int[] mask;
+        public final int mask;
         private final int x, y, w, h;
 
-        public QuadTreeData(int[] mask, int x, int y, int w, int h) {
+        public QuadTreeData(int mask, int x, int y, int w, int h) {
             this.mask = mask;
             this.x = x;
             this.y = y;
@@ -30,21 +30,23 @@ public class QuadTree {
 
             QuadTreeData that = (QuadTreeData) o;
 
-            if (x != that.x) return false;
-            if (y != that.y) return false;
-            if (w != that.w) return false;
-            if (h != that.h) return false;
-            return Arrays.equals(mask, that.mask);
+            return mask == that.mask;
         }
 
         @Override
         public int hashCode() {
-            int result = Arrays.hashCode(mask);
-            result = 31 * result + x;
-            result = 31 * result + y;
-            result = 31 * result + w;
-            result = 31 * result + h;
-            return result;
+            return mask;
+        }
+
+        @Override
+        public String toString() {
+            return "QuadTreeData{" +
+                    "mask=" + mask +
+                    ", x=" + x +
+                    ", y=" + y +
+                    ", w=" + w +
+                    ", h=" + h +
+                    '}';
         }
     }
     public static final Map<QuadTreeData, QuadTree> quadTrees = new HashMap<>();
@@ -93,13 +95,14 @@ public class QuadTree {
     }
 
     public static final int MIN_SUBDIVISION_SIZE = 32;
-    public static final int MAX_OBJECTS = 1;
+    public static final int MAX_OBJECTS = 3;
 
-    public static final int PIXEL_SIZE = 16;
+    public static final int PIXEL_SIZE = 32;
 
     private QuadTree parent;
     private final QuadTree[] children = new QuadTree[4];
     private final Set<Node> nodes = new HashSet<>();
+    private final Set<GameObject> objects = new HashSet<>();
     public final int depth;
     private final Rectangle bounds;
     private final boolean canSplit;
@@ -129,7 +132,7 @@ public class QuadTree {
 
     public void insert(Node node) {
         if (!bounds.contains(node.getX(), node.getY())) return;
-        nodes.add(node);
+        addNode(node);
         if (canSplit && nodes.size() > MAX_OBJECTS) {
             if (!hasSplit) {
                 split();
@@ -137,6 +140,11 @@ public class QuadTree {
                 index(node);
             }
         }
+    }
+
+    private void addNode(Node node) {
+        nodes.add(node);
+        objects.add(node.getValue());
     }
 
     private void split() {
@@ -151,10 +159,15 @@ public class QuadTree {
     }
 
     public void index(Node node) {
-        for (int i = 0; i < 4; i++) {
-            if (children[i].bounds.intersects(node.getValue().getBounds())) {
-                children[i].insert(node);
-            }
+        indexChild(0, node);
+        indexChild(1, node);
+        indexChild(2, node);
+        indexChild(3, node);
+    }
+
+    public void indexChild(int i, Node node) {
+        if (children[i].bounds.intersects(node.getValue().getBounds())) {
+            children[i].insert(node);
         }
     }
 
@@ -186,10 +199,6 @@ public class QuadTree {
     }
 
     public Set<GameObject> getObjects() {
-        Set<GameObject> objects = new HashSet<>();
-        for (Node node : nodes) {
-            objects.add(node.getValue());
-        }
         return objects;
     }
 
@@ -219,22 +228,32 @@ public class QuadTree {
         return this;
     }
 
-    public static QuadTree build(int[] collisionMask, int x, int y, int width, int height) {
-        QuadTreeData data = new QuadTreeData(collisionMask, x, y, width, height);
+    public static Set<QuadTree> build(int[] collisionMask, int x, int y, int width, int height) {
+        Set<QuadTree> trees = new HashSet<>();
+        for (int i : collisionMask) {
+            trees.add(build(i, x, y, width, height));
+        }
+        return trees;
+    }
+
+    public static QuadTree build(int layer, int x, int y, int width, int height) {
+        QuadTreeData data = new QuadTreeData(layer, x, y, width, height);
         if (quadTrees.containsKey(data)) {
             return quadTrees.get(data);
         }
 
+        for (Map.Entry<QuadTreeData, QuadTree> entry : quadTrees.entrySet()) {
+            if (entry.getKey().mask == layer) {
+                System.out.println(entry.getKey() + " " + data);
+            }
+        }
+
         QuadTree quadTree = new QuadTree(null, 0, new Rectangle(x, y, width, height));
-        Set<GameObject> objects = new HashSet<>();
-        for (int layer : collisionMask) {
-            CollisionLayer collisionLayer = Game.getInstance().getWorld().getLayer(layer);
-            if (collisionLayer != null) {
-                for (GameObject object : collisionLayer.getObjects()) {
-                    if (objects.contains(object)) continue;
-                    quadTree.insert(object);
-                    objects.add(object);
-                }
+
+        CollisionLayer collisionLayer = Game.getInstance().getWorld().getLayer(layer);
+        if (collisionLayer != null) {
+            for (GameObject object : collisionLayer.getObjects()) {
+                quadTree.insert(object);
             }
         }
 

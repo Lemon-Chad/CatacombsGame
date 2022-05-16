@@ -27,15 +27,13 @@ public class Vessel extends Enemy {
     }
 
     @Override
-    public void render(Graphics g) {
-        super.render(g);
-        g.setColor(getColor(Color.YELLOW));
-        g.fillRect(x, y, 32, 32);
+    protected int getSize() {
+        return 32;
     }
 
     @Override
-    public Rectangle getBounds() {
-        return new Rectangle(x, y, 32, 32);
+    protected Color getColor() {
+        return Color.YELLOW;
     }
 
     @Override

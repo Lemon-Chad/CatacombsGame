@@ -62,6 +62,8 @@ public class Reticle extends UIComponent {
             g.rotate(Math.PI / 4, x, y);
             drawCross(g, HITMARKER_SIZE);
         }
+
+        g.dispose();
     }
 
     private void drawCross(Graphics g, int r) {

@@ -88,7 +88,7 @@ public class Collectable extends GameObject {
             listener.onCollect(player, this);
             for (int i = 0; i < Utils.range(5, 15); i++) {
                 Particle particle = new PickupParticle(x, y);
-                Game.getInstance().getWorld().addObject(particle);
+                Game.getInstance().getWorld().addParticle(particle);
             }
         }
         destroy();

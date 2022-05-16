@@ -4,6 +4,9 @@ import com.lemon.catacombs.Utils;
 import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.Vector;
 import com.lemon.catacombs.engine.physics.GameObject;
+import com.lemon.catacombs.engine.render.Animation;
+import com.lemon.catacombs.engine.render.AnimationSpace;
+import com.lemon.catacombs.engine.render.BlendSpace;
 import com.lemon.catacombs.engine.render.Sprite;
 import com.lemon.catacombs.items.Weapon;
 import com.lemon.catacombs.objects.ID;
@@ -18,6 +21,7 @@ import com.lemon.catacombs.ui.Stats;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public abstract class Enemy extends PathingObject {
     private @Nullable DMGNumber dmgNumber;
@@ -26,17 +30,34 @@ public abstract class Enemy extends PathingObject {
     private double evadeAngle;
     private int state = State.CHASE;
     private boolean cancelLoot = false;
+    private final AnimationSpace animationSpace;
+    private final BlendSpace<String> directions;
 
     public Enemy(int x, int y, int health) {
         super(x, y, ID.Enemy, new int[]{ID.Block}, health);
         addCollisionMask(Layers.BLOCKS);
-        addCollisionMask(Layers.ENEMY);
         addCollisionMask(Layers.PLAYER);
 
         addObstacle(Layers.BLOCKS);
         addCost(Layers.ENEMY, 64);
 
         addCollisionLayer(Layers.ENEMY);
+
+        animationSpace = new AnimationSpace();
+        animationSpace.addAnimation("left", Animation.LoadSpriteSheet("/sprites/enemy/left.png",
+                1, 2).setSpeed(300));
+        animationSpace.addAnimation("right", Animation.LoadSpriteSheet("/sprites/enemy/right.png",
+                1, 2).setSpeed(300));
+        animationSpace.addAnimation("up", Animation.LoadSpriteSheet("/sprites/enemy/up.png",
+                1, 2).setSpeed(300));
+        animationSpace.addAnimation("down", Animation.LoadSpriteSheet("/sprites/enemy/down.png",
+                1, 2).setSpeed(300));
+
+        directions = new BlendSpace<>();
+        directions.add(-1, 0, "left");
+        directions.add(1, 0, "right");
+        directions.add(0, -0.9f, "up");
+        directions.add(0, 0.9f, "down");
     }
 
     public void setState(int state, int duration) {
@@ -76,6 +97,25 @@ public abstract class Enemy extends PathingObject {
     @Override
     public void tick() {
         tick(32, 32);
+    }
+
+    protected abstract int getSize();
+    protected abstract Color getColor();
+
+    @Override
+    public void render(Graphics g) {
+        super.render(g);
+
+        Vector velocity = new Vector(getVelX(), getVelY()).normalize();
+        directions.set((float) velocity.x, (float) velocity.y);
+        animationSpace.startAnimation(directions.get());
+
+        double alpha = Math.min(1, Math.max(0, state == State.EVADE ? (15 - stateDuration) / 60.0 : 1.0));
+
+        int width = getSize();
+        int height = getSize();
+        g.setColor(getColor(getColor()));
+        g.fillRect(getX(), getY(), width, height);
     }
 
     protected void tick(int maxDepth, int stepSize) {
@@ -208,7 +248,10 @@ public abstract class Enemy extends PathingObject {
     }
 
     @Override
-    public abstract Rectangle getBounds();
+    public Rectangle getBounds() {
+        // 15x / 5 - 3x / 5
+        return new Rectangle(x, y, getSize(), getSize());
+    }
 
     protected abstract void onPlayerHit(Player player);
 

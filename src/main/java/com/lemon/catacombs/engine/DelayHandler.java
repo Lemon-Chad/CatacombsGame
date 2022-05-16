@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class DelayHandler {
-    private final Set<Event> events = new HashSet<>();
+    private final ConcurrentSet<Event> events = new ConcurrentSet<>();
 
     private static class Event {
         private final Runnable runnable;
@@ -29,12 +29,11 @@ public class DelayHandler {
     }
 
     public void tick(long delta) {
-        HashSet<Event> toRemove = new HashSet<>();
         for (Event event : events) {
             if (event.tick(delta)) {
-                toRemove.add(event);
+                events.delete(event);
             }
         }
-        events.removeAll(toRemove);
+        events.commit();
     }
 }

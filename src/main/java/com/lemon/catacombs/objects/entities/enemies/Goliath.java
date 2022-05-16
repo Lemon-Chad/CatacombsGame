@@ -34,6 +34,16 @@ public class Goliath extends Enemy {
     }
 
     @Override
+    protected int getSize() {
+        return 96;
+    }
+
+    @Override
+    protected Color getColor() {
+        return Color.BLUE;
+    }
+
+    @Override
     protected void onDeath() {
         cancelLoot();
         super.onDeath();
@@ -59,14 +69,6 @@ public class Goliath extends Enemy {
         int barX = x + (96 - w) / 2;
         int barY = y - 16;
         g.fillRect(barX, barY, w, 8);
-
-        g.setColor(getColor(Color.BLUE));
-        g.fillRect(x, y, 96, 96);
-    }
-
-    @Override
-    public Rectangle getBounds() {
-        return new Rectangle(x, y, 96, 96);
     }
 
     @Override

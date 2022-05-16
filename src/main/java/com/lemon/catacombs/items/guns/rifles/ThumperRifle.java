@@ -8,7 +8,7 @@ import com.lemon.catacombs.objects.entities.Player;
 import com.lemon.catacombs.objects.projectiles.ImpactGrenade;
 
 public class ThumperRifle extends Gun {
-    private static final Sprite sprite = Sprite.LoadSprite("/sprites/guns/grenadegun.png");
+    private static final Sprite sprite = Sprite.LoadSprite("/sprites/guns/grenadegun.png").originFromUV();
     private boolean firing = false;
     private final int cookTime;
     private final int radius;

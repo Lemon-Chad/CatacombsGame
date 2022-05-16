@@ -17,13 +17,6 @@ public class Stalker extends Enemy {
     }
 
     @Override
-    public void render(Graphics g) {
-        super.render(g);
-        g.setColor(getColor(new Color(255, 122, 0)));
-        g.fillRect(x, y, 64, 64);
-    }
-
-    @Override
     protected int getSpeed() {
         return 3;
     }
@@ -53,8 +46,13 @@ public class Stalker extends Enemy {
     }
 
     @Override
-    public Rectangle getBounds() {
-        return new Rectangle(x, y, 64, 64);
+    protected int getSize() {
+        return 64;
+    }
+
+    @Override
+    protected Color getColor() {
+        return new Color(255, 122, 0);
     }
 
     @Override

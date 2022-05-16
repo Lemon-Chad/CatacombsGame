@@ -9,7 +9,7 @@ import com.lemon.catacombs.objects.entities.Player;
 import com.lemon.catacombs.objects.projectiles.ImpactGrenade;
 
 public class WebRifle extends Gun {
-    private static final Sprite sprite = Sprite.LoadSprite("/sprites/guns/webcannon.png");
+    private static final Sprite sprite = Sprite.LoadSprite("/sprites/guns/webcannon.png").originFromUV();
     private boolean firing = false;
     private final int lifespan;
     private final int radius;

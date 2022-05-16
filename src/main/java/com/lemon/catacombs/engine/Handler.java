@@ -6,55 +6,58 @@ import com.lemon.catacombs.engine.physics.CollisionLayer;
 import com.lemon.catacombs.engine.render.Camera;
 import com.lemon.catacombs.engine.render.UIComponent;
 import com.lemon.catacombs.engine.render.YSortable;
-import com.lemon.catacombs.objects.entities.Player;
-import com.lemon.catacombs.objects.entities.enemies.Enemy;
-import com.lemon.catacombs.objects.projectiles.Bullet;
+import com.lemon.catacombs.objects.Layers;
 
 import java.awt.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
 public class Handler {
-    private final Set<GameObject> objects = new HashSet<>();
-    private final Set<GameObject> objectsToRemove = new HashSet<>();
-    private final Set<GameObject> objectsToAdd = new HashSet<>();
-    private final Set<UIComponent> uiObjects = new HashSet<>();
-    private final Set<UIComponent> uiObjectsToRemove = new HashSet<>();
-    private final Set<UIComponent> uiObjectsToAdd = new HashSet<>();
+    private final ConcurrentSet<GameObject> objects;
+    private final ConcurrentSet<UIComponent> uiObjects;
+    // Particles are simply GameObjects without collision computation
+    private final ConcurrentSet<GameObject> particles;
     private final Map<Integer, CollisionLayer> collisionLayers = new HashMap<>();
 
     private static final int quadTreeRadius = 20;
 
+    public Handler() {
+        objects = new ConcurrentSet<>(null, item -> {
+            for (CollisionLayer collisionLayer : collisionLayers.values()) {
+                collisionLayer.remove(item);
+            }
+        });
+        uiObjects = new ConcurrentSet<>();
+        particles = new ConcurrentSet<>();
+    }
+
     public void tick() {
+        QuadTree.INNOVATION = 0;
         for (GameObject object : objects) {
             object.tick();
         }
+
         for (UIComponent uiComponent : uiObjects) {
             uiComponent.tick();
         }
 
-        for (GameObject object : objectsToRemove) {
-            objects.remove(object);
-            for (CollisionLayer collisionLayer : collisionLayers.values()) {
-                collisionLayer.remove(object);
-            }
+        for (GameObject object : particles) {
+            object.tick();
         }
-        objectsToRemove.clear();
-        objects.addAll(objectsToAdd);
-        objectsToAdd.clear();
-        uiObjects.removeAll(uiObjectsToRemove);
-        uiObjectsToRemove.clear();
-        uiObjects.addAll(uiObjectsToAdd);
-        uiObjectsToAdd.clear();
+
+        objects.commit();
+        uiObjects.commit();
+        particles.commit();
 
         QuadTree.clear();
     }
 
-    public QuadTree quadTreeForLayers(int[] mask) {
+    public Set<QuadTree> quadTreeForLayers(int[] mask) {
         Camera camera = Game.getInstance().getCamera();
-        int x = (int) camera.getX() + Game.getInstance().getWidth() / 2;
-        int y = (int) camera.getY() + Game.getInstance().getHeight() / 2;
-        QuadTree.INNOVATION = 0;
+        int x = (int) Math.floor(camera.getX()) + Game.getInstance().getWidth() / 2;
+        int y = (int) Math.floor(camera.getY()) + Game.getInstance().getHeight() / 2;
+        return quadTreeForLayers(mask, x, y);
+    }
+
+    public Set<QuadTree> quadTreeForLayers(int[] mask, int x, int y) {
         return QuadTree.build(mask, x - quadTreeRadius * 32, y - quadTreeRadius * 32,
                 quadTreeRadius * 64, quadTreeRadius * 64);
     }
@@ -62,17 +65,20 @@ public class Handler {
     public void collisions() {
         for (GameObject object : objects) {
             int[] mask = new int[object.getCollisionMask().size()];
+            if (mask.length == 0) continue;
             int i = 0;
             for (int layer : object.getCollisionMask()) {
                 mask[i] = layer;
                 i++;
             }
-            QuadTree quadTree = quadTreeForLayers(mask);
-            Set<QuadTree> trees = quadTree.getTrees(object.getBounds());
-            for (QuadTree tree : trees) {
-                for (GameObject other : tree.getObjects()) {
-                    if (object != other && colliding(object, other)) {
-                        object.collision(other);
+            Set<QuadTree> quadTrees = quadTreeForLayers(mask);
+            for (QuadTree quadTree : quadTrees) {
+                Set<QuadTree> trees = quadTree.getTrees(object.getBounds());
+                for (QuadTree tree : trees) {
+                    for (GameObject other : tree.getObjects()) {
+                        if (object != other && colliding(object, other)) {
+                            object.collision(other);
+                        }
                     }
                 }
             }
@@ -86,12 +92,14 @@ public class Handler {
             mask[i] = layer;
             i++;
         }
-        QuadTree quadTree = quadTreeForLayers(mask);
-        Set<QuadTree> trees = quadTree.getTrees(location);
-        for (QuadTree tree : trees) {
-            for (GameObject object : tree.getObjects()) {
-                if (object != origin && colliding(object, origin)) {
-                    return true;
+        Set<QuadTree> quadTrees = quadTreeForLayers(mask);
+        for (QuadTree quadTree : quadTrees) {
+            Set<QuadTree> trees = quadTree.getTrees(location);
+            for (QuadTree tree : trees) {
+                for (GameObject object : tree.getObjects()) {
+                    if (object != origin && colliding(object, origin)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -103,7 +111,7 @@ public class Handler {
     }
 
     public void render(Graphics g) {
-        for (GameObject object : YSortable.sort(objects)) {
+        for (GameObject object : YSortable.sort(objects, particles)) {
             object.render(g);
         }
     }
@@ -127,26 +135,34 @@ public class Handler {
     }
 
     public void addObject(GameObject object) {
-        objectsToAdd.add(object);
+        objects.add(object);
     }
 
     public void addObject(UIComponent object) {
-        uiObjectsToAdd.add(object);
+        uiObjects.add(object);
     }
 
     public void removeObject(GameObject object) {
-        objectsToRemove.add(object);
+        objects.delete(object);
     }
 
     public void removeObject(UIComponent object) {
-        uiObjectsToRemove.add(object);
+        uiObjects.delete(object);
     }
 
-    public Set<GameObject> getObjects() {
+    public void addParticle(GameObject particle) {
+        particles.add(particle);
+    }
+
+    public void removeParticle(GameObject particle) {
+        particles.delete(particle);
+    }
+
+    public ConcurrentSet<GameObject> getObjects() {
         return objects;
     }
 
-    public Set<UIComponent> getUI() {
+    public ConcurrentSet<UIComponent> getUI() {
         return uiObjects;
     }
 
@@ -163,8 +179,8 @@ public class Handler {
     }
 
     public void clear() {
-        Set<GameObject> objects = this.objects;
-        Set<UIComponent> uiObjects = this.uiObjects;
+        ConcurrentSet<GameObject> objects = this.objects;
+        ConcurrentSet<UIComponent> uiObjects = this.uiObjects;
         for (GameObject object : objects) {
             object.destroy();
         }

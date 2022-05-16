@@ -1,8 +1,11 @@
 package com.lemon.catacombs.objects.particles;
 
 import com.lemon.catacombs.Utils;
+import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.physics.GameObject;
 import com.lemon.catacombs.objects.ID;
+
+import java.awt.*;
 
 abstract public class Particle extends GameObject {
     private final float friction;
@@ -25,8 +28,6 @@ abstract public class Particle extends GameObject {
 
     @Override
     public void tick() {
-        super.tick();
-
         setVelX((float) Utils.approachZero(getVelX(), friction));
         setVelY((float) Utils.approachZero(getVelY(), friction));
 
@@ -44,5 +45,13 @@ abstract public class Particle extends GameObject {
 
     public int getDecay() {
         return decay;
+    }
+
+    @Override
+    public abstract void render(Graphics g);
+
+    @Override
+    public void destroy() {
+        Game.getInstance().getWorld().removeParticle(this);
     }
 }

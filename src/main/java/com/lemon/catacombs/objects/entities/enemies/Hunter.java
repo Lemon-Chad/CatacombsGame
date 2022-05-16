@@ -49,6 +49,16 @@ public class Hunter extends Enemy {
         }
     }
 
+    @Override
+    protected int getSize() {
+        return 32;
+    }
+
+    @Override
+    protected Color getColor() {
+        return Color.RED;
+    }
+
     protected void shoot(Player player) {
         double theta = Math.atan2(player.getY() - y, player.getX() - x);
         for (int i = 0; i < PELLET_COUNT; i++) {
@@ -64,18 +74,6 @@ public class Hunter extends Enemy {
         }
         Game.getInstance().getAudioHandler().playSound("/sounds/shotgun/fire" + (int) (1 + Math.random() * 2)
                 + ".wav", 0.25f, false);
-    }
-
-    @Override
-    public void render(Graphics g) {
-        super.render(g);
-        g.setColor(getColor(Color.RED));
-        g.fillRect(x, y, 32, 32);
-    }
-
-    @Override
-    public Rectangle getBounds() {
-        return new Rectangle(x, y, 32, 32);
     }
 
     @Override

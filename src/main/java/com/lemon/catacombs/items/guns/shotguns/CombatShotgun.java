@@ -4,7 +4,7 @@ import com.lemon.catacombs.engine.render.Sprite;
 import com.lemon.catacombs.objects.entities.Player;
 
 public class CombatShotgun extends Shotgun {
-    private static final Sprite sprite = Sprite.LoadSprite("/sprites/guns/shotgun.png");
+    private static final Sprite sprite = Sprite.LoadSprite("/sprites/guns/shotgun.png").originFromUV();
     /*
     * __Combat Shotgun__
     * - High damage
