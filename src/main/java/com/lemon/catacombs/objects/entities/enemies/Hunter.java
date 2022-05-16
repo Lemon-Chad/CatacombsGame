@@ -16,7 +16,7 @@ public class Hunter extends Enemy {
     private int cooldown = 0;
 
     public Hunter(int x, int y) {
-        super(x, y, (int) (Math.random() * 50 + 50));
+        super(x, y, (int) (Math.random() * 20 + 40));
     }
 
     @Override
