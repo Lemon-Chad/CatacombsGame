@@ -1,12 +1,14 @@
 package com.lemon.catacombs.items;
 
 import com.lemon.catacombs.engine.Game;
+import com.lemon.catacombs.engine.LootTable;
 import com.lemon.catacombs.engine.render.Sprite;
 import com.lemon.catacombs.engine.render.Spriteable;
 import com.lemon.catacombs.items.guns.pistols.MachinePistol;
 import com.lemon.catacombs.items.guns.pistols.Pistols;
 import com.lemon.catacombs.items.guns.pistols.Revolver;
 import com.lemon.catacombs.items.guns.rifles.CarbineRifle;
+import com.lemon.catacombs.items.guns.rifles.FrostbiteRifle;
 import com.lemon.catacombs.items.guns.rifles.ThumperRifle;
 import com.lemon.catacombs.items.guns.rifles.WebRifle;
 import com.lemon.catacombs.items.guns.shotguns.CombatShotgun;
@@ -19,6 +21,22 @@ import com.lemon.catacombs.objects.entities.Collectable;
 import com.lemon.catacombs.objects.entities.Player;
 
 public interface Weapon {
+    LootTable<WeaponFactory> lootTable = LootTable.EvenDistribution(
+            ButterflyKnife::new,
+            Sword::new,
+            Screwdriver::new,
+            Daggers::new,
+            Revolver::new,
+            MachinePistol::new,
+            Pistols::new,
+            LeverShotgun::new,
+            CombatShotgun::new,
+            ThumperRifle::new,
+            CarbineRifle::new,
+            WebRifle::new,
+            FrostbiteRifle::new
+    );
+
     static Weapon generateMelee() {
         int type = (int) (Math.random() * 4);
         switch (type) {
@@ -67,7 +85,7 @@ public interface Weapon {
     }
 
     static Weapon generateRifle() {
-        int type = (int) (Math.random() * 3);
+        int type = (int) (Math.random() * 4);
         // Will add more in future
         switch (type) {
             case 1:
@@ -76,6 +94,9 @@ public interface Weapon {
             case 2:
                 // Web Rifle
                 return new WebRifle();
+            case 3:
+                // Frostbite Rifle
+                return new FrostbiteRifle();
             default:
                 // Carbine Rifle
                 return new CarbineRifle();
@@ -83,22 +104,11 @@ public interface Weapon {
     }
 
     static Weapon generateWeapon() {
-        int type = (int) (Math.random() * 4);
-        // Will add more in future
-        switch (type) {
-            case 1:
-                // Shotgun
-                return generateShotgun();
-            case 2:
-                // Rifle
-                return generateRifle();
-            case 3:
-                // Melee
-                return generateMelee();
-            default:
-                // Pistol
-                return generatePistol();
-        }
+        return lootTable.getRandomItem().build();
+    }
+
+    interface WeaponFactory {
+        Weapon build();
     }
 
     static Collectable dropWeapon(Weapon weapon, int x, int y) {
