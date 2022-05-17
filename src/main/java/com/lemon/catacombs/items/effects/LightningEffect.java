@@ -50,18 +50,27 @@ public class LightningEffect implements Weapon.BulletEffect {
         }
 
         public void render(Graphics g) {
-            g.setColor(new Color(0, 100, 255, 255));
-            ((Graphics2D) g).setStroke(new BasicStroke(5));
             for (Chain c : chain) {
-                int cx = (int) getTarget().getBounds().getCenterX();
-                int cy = (int) getTarget().getBounds().getCenterY();
+                g.setColor(new Color(0, 178, 255, 255));
+                ((Graphics2D) g).setStroke(new BasicStroke(5));
+                drawLine(g, c.getTarget());
 
-                int ocx = (int) c.getTarget().getBounds().getCenterX();
-                int ocy = (int) c.getTarget().getBounds().getCenterY();
+                g.setColor(new Color(101, 233, 248, 255));
+                ((Graphics2D) g).setStroke(new BasicStroke(3));
+                drawLine(g, c.getTarget());
 
-                g.drawLine(cx, cy, ocx, ocy);
                 c.render(g);
             }
+        }
+
+        private void drawLine(Graphics g, GameObject to) {
+            int cx = (int) getTarget().getBounds().getCenterX();
+            int cy = (int) getTarget().getBounds().getCenterY();
+
+            int ocx = (int) to.getBounds().getCenterX();
+            int ocy = (int) to.getBounds().getCenterY();
+
+            g.drawLine(cx, cy, ocx, ocy);
         }
 
         public void damageAll(int damage) {

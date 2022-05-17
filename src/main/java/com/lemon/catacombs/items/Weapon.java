@@ -4,9 +4,7 @@ import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.LootTable;
 import com.lemon.catacombs.engine.render.Sprite;
 import com.lemon.catacombs.engine.render.Spriteable;
-import com.lemon.catacombs.items.effects.FireEffect;
-import com.lemon.catacombs.items.effects.LightningEffect;
-import com.lemon.catacombs.items.effects.SplitEffect;
+import com.lemon.catacombs.items.effects.*;
 import com.lemon.catacombs.items.guns.pistols.MachinePistol;
 import com.lemon.catacombs.items.guns.pistols.Pistols;
 import com.lemon.catacombs.items.guns.pistols.Revolver;
@@ -42,7 +40,12 @@ public interface Weapon {
             FrostbiteRifle::new
     );
     LootTable<EffectFactory> effectTable = LootTable.EvenDistribution(
-            SplitEffect::new
+            ExplosionEffect::new,
+            FireEffect::new,
+            LightningEffect::new,
+            SplitEffect::new,
+            IceEffect::new,
+            MomentumEffect::new
     );
 
     static Weapon generateMelee() {
@@ -116,8 +119,8 @@ public interface Weapon {
     }
 
     static Weapon generateWeapon() {
-        return generateWeapon(1);
-//        return generateWeapon((int) Math.floor(Math.log(Stats.getStats().getKills()) / Math.log(50)));
+//        return generateWeapon(1);
+        return generateWeapon(Stats.getStats().getEffectSlots());
     }
 
     static Weapon generateWeapon(int effectSlots) {

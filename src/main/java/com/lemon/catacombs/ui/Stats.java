@@ -71,4 +71,9 @@ public class Stats {
             else metersPerSecond = new Point((int) player.getVelX(), (int) player.getVelY()).distance(0, 0) / 5;
         }
     }
+
+    public int getEffectSlots() {
+        if (getKills() <= 0) return 0;
+        return (int) Math.floor(Math.log(getKills()) / Math.log(50));
+    }
 }

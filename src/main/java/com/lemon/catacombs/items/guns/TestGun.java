@@ -10,7 +10,7 @@ public class TestGun extends Gun {
     * Hell.
      */
     public TestGun() {
-        super(0, 0, 0, 0,
+        super(5, 5, 0, 0,
                 0, 0, 0, 0,
                 1000, 9999);
     }

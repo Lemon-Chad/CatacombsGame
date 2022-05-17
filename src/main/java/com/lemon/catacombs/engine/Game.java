@@ -8,9 +8,7 @@ import com.lemon.catacombs.engine.physics.GameObject;
 import com.lemon.catacombs.engine.render.Camera;
 import com.lemon.catacombs.engine.render.Window;
 import com.lemon.catacombs.items.Weapon;
-import com.lemon.catacombs.items.effects.FireEffect;
-import com.lemon.catacombs.items.effects.LightningEffect;
-import com.lemon.catacombs.items.effects.SplitEffect;
+import com.lemon.catacombs.items.effects.*;
 import com.lemon.catacombs.items.guns.TestGun;
 import com.lemon.catacombs.items.guns.rifles.FrostbiteRifle;
 import com.lemon.catacombs.objects.Block;
@@ -19,10 +17,7 @@ import com.lemon.catacombs.objects.endless.InfinitySpawner;
 import com.lemon.catacombs.objects.entities.Player;
 import com.lemon.catacombs.objects.entities.enemies.Vessel;
 import com.lemon.catacombs.objects.ui.FadeIn;
-import com.lemon.catacombs.ui.MenuUI;
-import com.lemon.catacombs.ui.PlayerHUD;
-import com.lemon.catacombs.ui.Reticle;
-import com.lemon.catacombs.ui.Stats;
+import com.lemon.catacombs.ui.*;
 import javafx.scene.effect.Light;
 
 import javax.swing.*;
@@ -72,9 +67,9 @@ public class Game extends Canvas implements Runnable {
         audioHandler.playSound("/sounds/item.wav", 0);
         loader.loadImage("/sprites/guns/pistol.png");
 
-//        menu();
+        menu();
 //        bossFight();
-        playground();
+//        playground();
 
         camera = new Camera(0, 0);
 
@@ -121,6 +116,51 @@ public class Game extends Canvas implements Runnable {
 
     public void ui() {
         handler.addObject(new PlayerHUD(400, 30, 300, 15, 64));
+        handler.addObject(new Ribbon(15, 96) {
+            private int count = 0;
+
+            @Override
+            public boolean isTriggered() {
+                int newCount = Stats.getStats().getEffectSlots();
+                if (newCount != count) {
+                    count = newCount;
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public String getText() {
+                return "NEW EFFECT SLOT";
+            }
+
+            @Override
+            public Color getColor() {
+                return new Color(0, 149, 255);
+            }
+
+            @Override
+            public int getDuration() {
+                return 120;
+            }
+
+            @Override
+            public int getTransition() {
+                return 20;
+            }
+
+            @Override
+            public Font getFont() {
+                int boldItalic = Font.BOLD | Font.ITALIC;
+                return new Font("Arial", boldItalic, 48);
+            }
+
+            @Override
+            public float interpolate(float x) {
+                System.out.println(x);
+                return 1 / (1 + (float) Math.exp(5 - 10 * x));
+            }
+        });
     }
 
     public void endlessMode() {
@@ -145,7 +185,7 @@ public class Game extends Canvas implements Runnable {
         ui();
         handler.addObject(new Player(0, 0));
         handler.addObject(new CheckeredBackground());
-        handler.addObject(Weapon.dropWeapon(new TestGun().addEffect(new SplitEffect()), 0, 64));
+        handler.addObject(Weapon.dropWeapon(new TestGun().addEffect(new LightningEffect()), 0, 64));
         handler.addObject(new InfinitySpawner());
         weaponSpawn();
     }

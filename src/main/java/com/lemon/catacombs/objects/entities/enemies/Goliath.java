@@ -12,7 +12,7 @@ public class Goliath extends Enemy {
     private int cooldown = 0;
 
     public Goliath(int x, int y) {
-        super(x, y, (int) (Math.random() * 500 + 500));
+        super(x, y, (int) (Math.random() * 2500 + 2500));
     }
 
     @Override
