@@ -84,4 +84,8 @@ abstract public class Damageable extends PhysicsObject {
     protected void setInvincibility(int invincibility) {
         this.invincibility = invincibility;
     }
+
+    public void setInvulnerable(boolean b) {
+        invincibility = b ? 60 : 0;
+    }
 }

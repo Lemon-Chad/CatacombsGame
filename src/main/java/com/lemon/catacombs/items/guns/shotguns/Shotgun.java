@@ -20,7 +20,7 @@ public abstract class Shotgun extends Gun {
 
     protected void fireBlast(Player player, float speed, float speedDecay, int dmg, double bloom, int pellets) {
         for (int i = 0; i < pellets; i++) {
-            player.shoot((float) Utils.range(speedDecay * speed, speed), dmg, bloom);
+            shoot(player, (float) Utils.range(speedDecay * speed, speed), dmg, bloom);
         }
     }
 

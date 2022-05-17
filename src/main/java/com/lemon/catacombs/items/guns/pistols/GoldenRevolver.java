@@ -33,7 +33,7 @@ public class GoldenRevolver extends Gun {
     }
 
     private void bullet(Player player) {
-        player.shoot(20f, getDamage(), getBloom()).addEffect(bullet -> {
+        shoot(player, 20f, getDamage(), getBloom()).addEffect(bullet -> {
             for (int i = 0; i < 5; i++) {
                 Particle fire = new FireParticle(bullet.getX() + 4 + (int) (Math.random() * 8), bullet.getY() + 4 + (int) (Math.random() * 8));
                 Game.getInstance().getWorld().addParticle(fire);

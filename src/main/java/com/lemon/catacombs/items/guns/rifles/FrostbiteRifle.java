@@ -102,7 +102,7 @@ public class FrostbiteRifle extends Gun {
                 destroy();
             }
         };
-        player.shoot(128f, getDamage(), getBloom(), tracerBullet);
+        shoot(player, 128f, getDamage(), getBloom(), tracerBullet);
     }
 
     @Override

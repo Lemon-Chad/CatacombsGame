@@ -242,12 +242,6 @@ public class QuadTree {
             return quadTrees.get(data);
         }
 
-        for (Map.Entry<QuadTreeData, QuadTree> entry : quadTrees.entrySet()) {
-            if (entry.getKey().mask == layer) {
-                System.out.println(entry.getKey() + " " + data);
-            }
-        }
-
         QuadTree quadTree = new QuadTree(null, 0, new Rectangle(x, y, width, height));
 
         CollisionLayer collisionLayer = Game.getInstance().getWorld().getLayer(layer);

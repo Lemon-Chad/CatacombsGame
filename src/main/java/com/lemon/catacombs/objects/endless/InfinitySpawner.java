@@ -9,7 +9,7 @@ import com.lemon.catacombs.objects.entities.Player;
 import java.awt.*;
 
 public class InfinitySpawner extends GameObject {
-    private static final int spawnDelay = 100;
+    private static final int spawnDelay = 25;
     private static final int spawnRadius = 1000;
     private int spawnTimer = -spawnDelay;
     private int spawns = 0;
@@ -30,7 +30,6 @@ public class InfinitySpawner extends GameObject {
     }
 
     private void spawn() {
-        System.out.println(spawns);
         double angle = Math.random() * Math.PI * 2;
         double ox = spawnRadius * Math.cos(angle);
         double oy = spawnRadius * Math.sin(angle);

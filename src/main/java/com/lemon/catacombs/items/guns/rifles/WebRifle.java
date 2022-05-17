@@ -26,13 +26,13 @@ public class WebRifle extends Gun {
     public WebRifle() {
         super(0, 0, 0.1, 0.7, 10, 15, 0.1,
                 0.2, 30, 60);
-        lifespan = (int) Utils.range(200, 250);
+        lifespan = (int) Utils.range(300, 500);
         radius = (int) Utils.range(15, 32);
     }
 
     @Override
     protected void onShoot(Player player) {
-        player.shoot(10f, getDamage(), getBloom(), new Web(player.getX() + 16, player.getY() + 16, radius,
+        shoot(player, 10f, getDamage(), getBloom(), new Web(player.getX() + 16, player.getY() + 16, radius,
                 lifespan));
         Game.getInstance().getCamera().setZoom(1.02f);
         Game.getInstance().getCamera().setShake(1.2f);

@@ -30,7 +30,7 @@ public class ThumperRifle extends Gun {
 
     @Override
     protected void onShoot(Player player) {
-        player.shoot(10f, getDamage(), getBloom(), new ImpactGrenade(player.getX() + 16, player.getY() + 16,
+        shoot(player, 10f, getDamage(), getBloom(), new ImpactGrenade(player.getX() + 16, player.getY() + 16,
                 cookTime, getDamage(), radius));
         Game.getInstance().getCamera().setZoom(1.02f);
         Game.getInstance().getCamera().setShake(1.2f);

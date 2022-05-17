@@ -29,7 +29,7 @@ public class MachinePistol extends Gun {
     @Override
     protected void onShoot(Player player) {
         Game.playSound(audioPath() + "fire" + (int) Utils.range(1, 3) + ".wav");
-        player.shoot(30, getDamage(), getBloom());
+        shoot(player, 30, getDamage(), getBloom());
     }
 
     @Override

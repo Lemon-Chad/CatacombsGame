@@ -23,8 +23,8 @@ public class Pistols extends Gun {
 
     @Override
     protected void onShoot(Player player) {
-        player.shoot(48f, getDamage(), getBloom());
-        player.shoot(48f, getDamage(), getBloom());
+        shoot(player, 48f, getDamage(), getBloom());
+        shoot(player, 48f, getDamage(), getBloom());
         Game.getInstance().getCamera().setZoom(1.02f);
     }
 

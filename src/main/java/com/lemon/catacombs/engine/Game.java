@@ -8,6 +8,10 @@ import com.lemon.catacombs.engine.physics.GameObject;
 import com.lemon.catacombs.engine.render.Camera;
 import com.lemon.catacombs.engine.render.Window;
 import com.lemon.catacombs.items.Weapon;
+import com.lemon.catacombs.items.effects.FireEffect;
+import com.lemon.catacombs.items.effects.LightningEffect;
+import com.lemon.catacombs.items.effects.SplitEffect;
+import com.lemon.catacombs.items.guns.TestGun;
 import com.lemon.catacombs.items.guns.rifles.FrostbiteRifle;
 import com.lemon.catacombs.objects.Block;
 import com.lemon.catacombs.objects.endless.CheckeredBackground;
@@ -19,6 +23,7 @@ import com.lemon.catacombs.ui.MenuUI;
 import com.lemon.catacombs.ui.PlayerHUD;
 import com.lemon.catacombs.ui.Reticle;
 import com.lemon.catacombs.ui.Stats;
+import javafx.scene.effect.Light;
 
 import javax.swing.*;
 import java.awt.*;
@@ -67,8 +72,9 @@ public class Game extends Canvas implements Runnable {
         audioHandler.playSound("/sounds/item.wav", 0);
         loader.loadImage("/sprites/guns/pistol.png");
 
-        menu();
+//        menu();
 //        bossFight();
+        playground();
 
         camera = new Camera(0, 0);
 
@@ -134,14 +140,13 @@ public class Game extends Canvas implements Runnable {
         });
     }
 
-    private void bossFight() {
+    private void playground() {
         reset();
         ui();
         handler.addObject(new Player(0, 0));
         handler.addObject(new CheckeredBackground());
-        for (int i = 0; i < 50; i++) {
-            handler.addObject(new Vessel(0, 0));
-        }
+        handler.addObject(Weapon.dropWeapon(new TestGun().addEffect(new SplitEffect()), 0, 64));
+        handler.addObject(new InfinitySpawner());
         weaponSpawn();
     }
 

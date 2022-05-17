@@ -124,4 +124,7 @@ public abstract class MeleeWeapon implements Weapon {
     public boolean breaksOnThrow() {
         return false;
     }
+
+    @Override
+    public Weapon addEffect(BulletEffect effect) { return this; }
 }

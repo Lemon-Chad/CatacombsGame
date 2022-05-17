@@ -395,8 +395,6 @@ public class Player extends Damageable {
 
         int originX = (int) (sprite.getOriginX() * ((float) swidth / img.getWidth()));
         int originY = (int) (sprite.getOriginY() * ((float) sheight / img.getHeight()));
-        System.out.println(originX);
-        System.out.println(originY);
 
         sprite.render(g, xPos - flipX * originX, yPos - originY, swidth * flipX, sheight,
                 angle + equipped.getLeverTurn());

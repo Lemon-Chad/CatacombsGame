@@ -7,8 +7,11 @@ import com.lemon.catacombs.engine.render.Spriteable;
 import com.lemon.catacombs.items.MeleeRange;
 import com.lemon.catacombs.items.Weapon;
 import com.lemon.catacombs.objects.entities.Player;
+import com.lemon.catacombs.objects.projectiles.Bullet;
 
 import java.awt.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public abstract class Gun implements Weapon {
     protected int damage;
@@ -21,6 +24,8 @@ public abstract class Gun implements Weapon {
 
     protected double currentRecoil;
     protected double recoil;
+
+    protected final Set<BulletEffect> effects = new HashSet<>();
 
     public Gun(int minDMG, int maxDMG, double minBloom, double maxBloom, int minFireRate, int maxFireRate,
                double minRecoil, double maxRecoil, int minAmmo, int maxAmmo) {
@@ -90,6 +95,20 @@ public abstract class Gun implements Weapon {
 
     protected abstract void onShoot(Player player);
 
+    protected Bullet shoot(Player player, float speed, int damage, double bloom, Bullet bullet) {
+        return applyEffects(player, player.shoot(speed, damage, bloom, bullet));
+    }
+
+    protected Bullet shoot(Player player, float speed, int damage, double bloom) {
+        return applyEffects(player, player.shoot(speed, damage, bloom));
+    }
+
+    private Bullet applyEffects(Player player, Bullet bullet) {
+        for (BulletEffect effect : effects)
+            effect.apply(player, bullet);
+        return bullet;
+    }
+
     @Override
     public abstract Sprite getSprite();
 
@@ -144,5 +163,11 @@ public abstract class Gun implements Weapon {
     @Override
     public boolean breaksOnThrow() {
         return true;
+    }
+
+    @Override
+    public Weapon addEffect(BulletEffect effect) {
+        effects.add(effect);
+        return this;
     }
 }

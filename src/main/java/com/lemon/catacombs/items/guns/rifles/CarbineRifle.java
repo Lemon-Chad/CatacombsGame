@@ -25,7 +25,7 @@ public class CarbineRifle extends Gun {
 
     @Override
     protected void onShoot(Player player) {
-        player.shoot(20f, getDamage(), getBloom());
+        shoot(player, 20f, getDamage(), getBloom());
         Game.getInstance().getCamera().setZoom(1.02f);
         Game.getInstance().getCamera().setShake(1.2f);
     }

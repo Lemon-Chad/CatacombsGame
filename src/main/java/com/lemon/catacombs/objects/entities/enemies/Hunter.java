@@ -37,7 +37,7 @@ public class Hunter extends Enemy {
         Player player = Game.getInstance().getPlayer();
         if (player != null) {
             if (getState() == State.CHASE) {
-                if (new Point(x, y).distance(player.getX(), player.getY()) < 128 && cooldown <= 0) {
+                if (Point.distance(x, y, player.getX(), player.getY()) < 128 && cooldown <= 0) {
                     cooldown = FIRE_RATE;
                     shoot(player);
                     evade(player, 30);

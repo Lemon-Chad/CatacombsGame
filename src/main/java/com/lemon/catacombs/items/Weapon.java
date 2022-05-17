@@ -4,6 +4,9 @@ import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.LootTable;
 import com.lemon.catacombs.engine.render.Sprite;
 import com.lemon.catacombs.engine.render.Spriteable;
+import com.lemon.catacombs.items.effects.FireEffect;
+import com.lemon.catacombs.items.effects.LightningEffect;
+import com.lemon.catacombs.items.effects.SplitEffect;
 import com.lemon.catacombs.items.guns.pistols.MachinePistol;
 import com.lemon.catacombs.items.guns.pistols.Pistols;
 import com.lemon.catacombs.items.guns.pistols.Revolver;
@@ -19,6 +22,8 @@ import com.lemon.catacombs.items.melee.Screwdriver;
 import com.lemon.catacombs.items.melee.Sword;
 import com.lemon.catacombs.objects.entities.Collectable;
 import com.lemon.catacombs.objects.entities.Player;
+import com.lemon.catacombs.objects.projectiles.Bullet;
+import com.lemon.catacombs.ui.Stats;
 
 public interface Weapon {
     LootTable<WeaponFactory> lootTable = LootTable.EvenDistribution(
@@ -35,6 +40,9 @@ public interface Weapon {
             CarbineRifle::new,
             WebRifle::new,
             FrostbiteRifle::new
+    );
+    LootTable<EffectFactory> effectTable = LootTable.EvenDistribution(
+            SplitEffect::new
     );
 
     static Weapon generateMelee() {
@@ -103,12 +111,32 @@ public interface Weapon {
         }
     }
 
+    static BulletEffect generateEffect() {
+        return effectTable.getRandomItem().build();
+    }
+
     static Weapon generateWeapon() {
-        return lootTable.getRandomItem().build();
+        return generateWeapon(1);
+//        return generateWeapon((int) Math.floor(Math.log(Stats.getStats().getKills()) / Math.log(50)));
+    }
+
+    static Weapon generateWeapon(int effectSlots) {
+        Weapon weapon = lootTable.getRandomItem().build();
+        for (int i = 0; i < effectSlots; i++)
+            weapon.addEffect(generateEffect());
+        return weapon;
     }
 
     interface WeaponFactory {
         Weapon build();
+    }
+
+    interface EffectFactory {
+        BulletEffect build();
+    }
+
+    interface BulletEffect {
+        void apply(Player player, Bullet bullet);
     }
 
     static Collectable dropWeapon(Weapon weapon, int x, int y) {
@@ -153,6 +181,8 @@ public interface Weapon {
     Spriteable getSpriteable();
 
     boolean canFire();
+
+    Weapon addEffect(BulletEffect effect);
 
     float getScale();
 }

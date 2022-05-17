@@ -41,8 +41,6 @@ public class Sprite implements Spriteable {
 
         int x = (int) Math.floor(r / 255f * image.getWidth());
         int y = (int) Math.floor(g / 255f * image.getHeight());
-        System.out.println(x + " " + y);
-        System.out.println(originX + " " + originY);
 
         setOrigin(x, y);
 
@@ -74,7 +72,6 @@ public class Sprite implements Spriteable {
     }
 
     public static Sprite LoadSprite(String path) {
-        System.out.println(path);
         return new Sprite(Game.loadImage(path));
     }
 

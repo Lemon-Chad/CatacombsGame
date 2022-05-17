@@ -10,7 +10,7 @@ public class TestGun extends Gun {
     * Hell.
      */
     public TestGun() {
-        super(30, 30, 0, 0,
+        super(0, 0, 0, 0,
                 0, 0, 0, 0,
                 1000, 9999);
     }
@@ -47,7 +47,7 @@ public class TestGun extends Gun {
 
     @Override
     protected void onShoot(Player player) {
-        player.shoot(64f, getDamage(), getBloom());
+        shoot(player, 64f, getDamage(), getBloom());
     }
 
     @Override
