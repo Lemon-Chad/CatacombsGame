@@ -36,7 +36,7 @@ public class Player extends Damageable {
     private boolean moving;
 
     private static final double JUMP_SPEED = 0.1f;
-    private static final int JUMP_HEIGHT = 32;
+    private static final int JUMP_HEIGHT = 40;
 
     private int prejump;
     private double jump;
@@ -320,7 +320,7 @@ public class Player extends Damageable {
 
         // Render jump shadow
         g.setColor(new Color(0, 0, 0, 100));
-        g.fillOval(x + 16 - (int) (24 * getJumpArc()), this.y + 64 - (int) (12 * getJumpArc()), (int) (48 * getJumpArc()), (int) (24 * getJumpArc()));
+        g.fillOval(x + 16 - (int) (24 * getJumpArc()), this.y + 40 - (int) (12 * getJumpArc()), (int) (48 * getJumpArc()), (int) (24 * getJumpArc()));
 
         // Render hands if in back
         if (k.equals("up")) {
