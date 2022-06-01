@@ -14,7 +14,7 @@ public class FireParticle extends Particle {
         super(x, y, 0.1f, 3);
         angle = Math.random() * Math.PI * 2;
         hue = (float) (Math.random() * 60 / 360);
-        size = (int) Utils.range(4, 8);
+        size = Utils.intRange(4, 8);
     }
 
     @Override
@@ -33,10 +33,5 @@ public class FireParticle extends Particle {
     @Override
     public Rectangle getBounds() {
         return new Rectangle(x, y, size, size);
-    }
-
-    @Override
-    public void collision(GameObject other) {
-
     }
 }

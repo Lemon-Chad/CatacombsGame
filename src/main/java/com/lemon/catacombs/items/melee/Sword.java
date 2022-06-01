@@ -9,8 +9,8 @@ public class Sword extends MeleeWeapon {
     private final int damage;
 
     public Sword() {
-        super((int) Utils.range(10, 20));
-        damage = (int) Utils.range(45, 60);
+        super(Utils.intRange(10, 20));
+        damage = Utils.intRange(45, 60);
     }
 
     @Override

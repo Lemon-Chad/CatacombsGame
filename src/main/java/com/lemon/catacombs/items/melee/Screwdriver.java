@@ -9,8 +9,8 @@ public class Screwdriver extends MeleeWeapon {
     private final int damage;
 
     public Screwdriver() {
-        super((int) Utils.range(1, 3));
-        this.damage = (int) Utils.range(1, 3);
+        super(Utils.intRange(1, 3));
+        this.damage = Utils.intRange(1, 3);
     }
 
     @Override

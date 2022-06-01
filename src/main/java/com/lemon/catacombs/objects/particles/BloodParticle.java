@@ -29,9 +29,4 @@ public class BloodParticle extends Particle {
     public Rectangle getBounds() {
         return new Rectangle(x, y, 1, 1);
     }
-
-    @Override
-    public void collision(GameObject other) {
-
-    }
 }

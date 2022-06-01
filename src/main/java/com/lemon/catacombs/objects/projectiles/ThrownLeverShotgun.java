@@ -18,8 +18,7 @@ public class ThrownLeverShotgun extends ThrownWeapon {
         ammo = shotgun.getAmmo();
         cooldown = 10;
 
-        setVelX(getVelX() / 2);
-        setVelY(getVelY() / 2);
+        friction(0.5f);
     }
 
     @Override
@@ -58,7 +57,7 @@ public class ThrownLeverShotgun extends ThrownWeapon {
             Game.getInstance().getWorld().addObject(bullet);
         }
 
-        Game.playSound(weapon.audioPath() + "fire" + (int) Utils.range(1, 3) + ".wav");
-        Game.playSound(weapon.audioPath() + "lever" + (int) Utils.range(1, 3) + ".wav");
+        Game.playSound(weapon.audioPath() + "fire" + Utils.intRange(1, 3) + ".wav");
+        Game.playSound(weapon.audioPath() + "lever" + Utils.intRange(1, 3) + ".wav");
     }
 }

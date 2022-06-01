@@ -94,8 +94,7 @@ public class FrostbiteRifle extends Gun {
                     Enemy enemy = (Enemy) other;
                     if (enemy.getState() == Enemy.State.STUN) return;
                     if (enemy.damage(getDamage(), this)) {
-                        setVelX(getVelX() * 0.8f);
-                        setVelY(getVelY() * 0.8f);
+                        friction(0.8f);
                     }
                     return;
                 }

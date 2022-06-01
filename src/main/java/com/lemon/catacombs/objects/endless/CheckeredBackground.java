@@ -3,16 +3,26 @@ package com.lemon.catacombs.objects.endless;
 import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.physics.GameObject;
 import com.lemon.catacombs.objects.ID;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
+import java.util.Set;
 
 public class CheckeredBackground extends GameObject {
-    private static final int tileSize = 64;
     private static final Color oddColor = new Color(0x464641);
     private static final Color evenColor = new Color(0x505050);
+    private final @Nullable Set<Point> points;
+    private int tileSize = 64;
 
     public CheckeredBackground() {
         super(0, 0, ID.UI);
+        points = null;
+    }
+
+    public CheckeredBackground(@NotNull Set<Point> points) {
+        super(0, 0, ID.UI);
+        this.points = points;
     }
 
     @Override
@@ -23,6 +33,14 @@ public class CheckeredBackground extends GameObject {
     @Override
     public void render(Graphics g) {
         super.render(g);
+        if (points == null) {
+            renderScrolling(g);
+        } else {
+            renderFixed(g);
+        }
+    }
+
+    private void renderScrolling(Graphics g) {
         int cx = (int) Game.getInstance().getCamera().getX();
         int cy = (int) Game.getInstance().getCamera().getY();
 
@@ -36,6 +54,14 @@ public class CheckeredBackground extends GameObject {
         }
     }
 
+    private void renderFixed(Graphics g) {
+        assert points != null;
+        for (Point point : points) {
+            g.setColor((point.x / tileSize + point.y / tileSize) % 2 == 0 ? evenColor : oddColor);
+            g.fillRect(point.x, point.y, tileSize, tileSize);
+        }
+    }
+
     @Override
     public Rectangle getBounds() {
         return new Rectangle(0, 0, 0, 0);
@@ -44,5 +70,9 @@ public class CheckeredBackground extends GameObject {
     @Override
     public void collision(GameObject other) {
 
+    }
+
+    public void setTileSize(int tileSize) {
+        this.tileSize = tileSize;
     }
 }

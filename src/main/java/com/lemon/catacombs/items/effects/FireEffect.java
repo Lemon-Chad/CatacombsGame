@@ -19,8 +19,8 @@ public class FireEffect implements Weapon.BulletEffect {
     private final int duration;
 
     public FireEffect() {
-        damage = (int) Utils.range(5, 10);
-        duration = (int) Utils.range(30, 90);
+        damage = Utils.intRange(5, 10);
+        duration = Utils.intRange(30, 90);
     }
 
     @Override

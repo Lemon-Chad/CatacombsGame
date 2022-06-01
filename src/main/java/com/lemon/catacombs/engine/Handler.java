@@ -7,6 +7,7 @@ import com.lemon.catacombs.engine.render.Camera;
 import com.lemon.catacombs.engine.render.UIComponent;
 import com.lemon.catacombs.engine.render.YSortable;
 import com.lemon.catacombs.objects.Layers;
+import com.lemon.catacombs.objects.entities.Player;
 
 import java.awt.*;
 import java.util.*;
@@ -17,10 +18,14 @@ public class Handler {
     private final ConcurrentSet<GameObject> particles;
     private final Map<Integer, CollisionLayer> collisionLayers = new HashMap<>();
 
-    private static final int quadTreeRadius = 20;
+    private static final int quadTreeRadius = 100;
 
     public Handler() {
-        objects = new ConcurrentSet<>(null, item -> {
+        objects = new ConcurrentSet<>(item -> {
+            for (int layer : item.getCollisionLayer()) {
+                addToLayer(item, layer);
+            }
+        }, item -> {
             for (CollisionLayer collisionLayer : collisionLayers.values()) {
                 collisionLayer.remove(item);
             }
@@ -51,10 +56,15 @@ public class Handler {
     }
 
     public Set<QuadTree> quadTreeForLayers(int[] mask) {
-        Camera camera = Game.getInstance().getCamera();
-        int x = (int) Math.floor(camera.getX()) + Game.getInstance().getWidth() / 2;
-        int y = (int) Math.floor(camera.getY()) + Game.getInstance().getHeight() / 2;
-        return quadTreeForLayers(mask, x, y);
+        float ox, oy;
+        if (Game.getInstance().getPlayer() != null) {
+            ox = Game.getInstance().getPlayer().getX();
+            oy = Game.getInstance().getPlayer().getY();
+        } else {
+            ox = Game.getInstance().getCamera().getX() + Game.getInstance().getWidth() / 2f;
+            oy = Game.getInstance().getCamera().getY() + Game.getInstance().getHeight() / 2f;
+        }
+        return quadTreeForLayers(mask, (int) ox, (int) oy);
     }
 
     public Set<QuadTree> quadTreeForLayers(int[] mask, int x, int y) {
@@ -167,7 +177,11 @@ public class Handler {
     }
 
     public void addToLayer(GameObject object, int layer) {
-        collisionLayers.computeIfAbsent(layer, CollisionLayer::new).add(object);
+        if (!objects.contains(object)) {
+            return;
+        }
+        CollisionLayer l = collisionLayers.computeIfAbsent(layer, CollisionLayer::new);
+        l.add(object);
     }
 
     public void removeFromLayer(GameObject gameObject, int layer) {
@@ -175,6 +189,10 @@ public class Handler {
     }
 
     public CollisionLayer getLayer(int layer) {
+        if (collisionLayers.containsKey(layer)) {
+            return collisionLayers.get(layer);
+        }
+        collisionLayers.put(layer, new CollisionLayer(layer));
         return collisionLayers.get(layer);
     }
 

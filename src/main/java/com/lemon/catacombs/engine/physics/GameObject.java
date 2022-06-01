@@ -2,6 +2,7 @@ package com.lemon.catacombs.engine.physics;
 
 import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.render.YSortable;
+import org.w3c.dom.css.Rect;
 
 import java.awt.*;
 import java.util.Collections;
@@ -68,6 +69,7 @@ abstract public class GameObject implements YSortable {
     }
 
     public void tick() {
+        if (Game.getInstance().getPhysicsSpeed() == 0) return;
         if (affected) {
             Set<Effect> toRemove = new HashSet<>();
             for (Effect effect : effects) {
@@ -84,6 +86,21 @@ abstract public class GameObject implements YSortable {
             effect.render(g);
         }
     }
+
+    private void renderFutureHiboxes(Graphics g) {
+        Rectangle self = getBounds();
+        g.setColor(Color.RED);
+        int velXSign = velX > 0 ? 1 : -1;
+        for (int i = 0; i < Math.abs(getVelX()); i++) {
+            g.drawRect(self.x + velXSign * i, self.y, self.width, self.height);
+        }
+        g.setColor(Color.BLUE);
+        int velYSign = velY > 0 ? 1 : -1;
+        for (int i = 0; i < Math.abs(getVelY()); i++) {
+            g.drawRect(self.x, self.y + i * velYSign, self.width, self.height);
+        }
+    }
+
     public abstract Rectangle getBounds();
 
     public int getX() {
@@ -208,5 +225,10 @@ abstract public class GameObject implements YSortable {
     protected void addVel(float velX, float velY) {
         this.velX += velX;
         this.velY += velY;
+    }
+
+    public void friction(float friction) {
+        velX *= Math.pow(friction, Game.getInstance().getPhysicsSpeed());
+        velY *= Math.pow(friction, Game.getInstance().getPhysicsSpeed());
     }
 }

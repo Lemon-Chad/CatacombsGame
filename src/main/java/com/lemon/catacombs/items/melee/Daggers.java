@@ -11,8 +11,8 @@ public class Daggers extends MeleeWeapon {
     private final int damage;
 
     public Daggers() {
-        super((int) Utils.range(30, 40));
-        damage = (int) Utils.range(25, 35);
+        super(Utils.intRange(30, 40));
+        damage = Utils.intRange(25, 35);
     }
 
     @Override

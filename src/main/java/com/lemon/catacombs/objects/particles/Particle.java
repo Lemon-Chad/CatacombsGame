@@ -31,8 +31,8 @@ abstract public class Particle extends GameObject {
         setVelX((float) Utils.approachZero(getVelX(), friction));
         setVelY((float) Utils.approachZero(getVelY(), friction));
 
-        x += Math.round(getVelX());
-        y += Math.round(getVelY());
+        x += Math.round(getVelX() * Game.getInstance().getPhysicsSpeed());
+        y += Math.round(getVelY() * Game.getInstance().getPhysicsSpeed());
 
         life++;
         if (life >= decay * 2)
@@ -49,6 +49,11 @@ abstract public class Particle extends GameObject {
 
     @Override
     public abstract void render(Graphics g);
+
+    @Override
+    public final void collision(GameObject other) {
+        // Do nothing, particles don't collide
+    }
 
     @Override
     public void destroy() {

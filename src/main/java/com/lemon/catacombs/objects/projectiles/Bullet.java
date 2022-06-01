@@ -33,11 +33,10 @@ public abstract class Bullet extends GameObject {
     public void tick() {
         super.tick();
 
-        x += Math.round(getVelX());
-        y += Math.round(getVelY());
+        x += Math.round(getVelX() * Game.getInstance().getPhysicsSpeed());
+        y += Math.round(getVelY() * Game.getInstance().getPhysicsSpeed());
 
-        setVelX(getVelX() * 0.99f);
-        setVelY(getVelY() * 0.99f);
+        friction(0.99f);
 
         if (getVelX() < 0.1 && getVelX() > -0.1) {
             destroy();

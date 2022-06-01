@@ -12,7 +12,7 @@ public class PickupParticle extends Particle {
     public PickupParticle(int x, int y) {
         super(x, y, 0.1f, 10);
         angle = Math.random() * Math.PI * 2;
-        size = (int) Utils.range(6, 16);
+        size = Utils.intRange(6, 16);
         float force = (float) Utils.range(3, 6);
         setVelX((float) Math.cos(angle) * force);
         setVelY((float) Math.sin(angle) * force);
@@ -32,10 +32,5 @@ public class PickupParticle extends Particle {
     @Override
     public Rectangle getBounds() {
         return new Rectangle(x, y, 0, 0);
-    }
-
-    @Override
-    public void collision(GameObject other) {
-
     }
 }

@@ -1,18 +1,26 @@
 package com.lemon.catacombs;
 
 import com.lemon.catacombs.engine.Game;
+import com.lemon.catacombs.engine.Vector;
 import com.lemon.catacombs.objects.particles.BloodParticle;
 
 import java.awt.*;
 import java.awt.color.ColorSpace;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
-import java.awt.image.ColorConvertOp;
-import java.awt.image.ColorModel;
+import java.awt.image.*;
+import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class Utils {
+    public static final Random random = new Random();
+    public static final double NORMAL_CONSTANT = 1 / Math.sqrt(2 * Math.PI);
+
     public static double approachZero(double n, double dn) {
         if (n > 0) {
             return Math.max(n - dn, 0);
@@ -47,6 +55,10 @@ public class Utils {
 
     public static double range(double min, double max) {
         return Math.random() * (max - min) + min;
+    }
+
+    public static int intRange(int min, int max) {
+        return (int) range(min, max + 1);
     }
 
     public static Point rotate(Point p, double angle) {
@@ -136,5 +148,83 @@ public class Utils {
         g2d.drawImage(img, 0, 0, null);
         g2d.dispose();
         return alpha;
+    }
+
+    public static Point randomPointInCircle(int radius) {
+        double angle = Math.random() * 2 * Math.PI;
+        double u = Math.random() + Math.random();
+        double r = u > 1 ? 2 - u : u;
+        int x = (int) (Math.cos(angle) * r * radius);
+        int y = (int) (Math.sin(angle) * r * radius);
+        return new Point(x, y);
+    }
+
+    public static double normalDistribution(double mean, double stddev) {
+        return random.nextGaussian() * stddev + mean;
+    }
+
+    public static double normal(double min, double max) {
+        return normalDistribution(0.5, 0.1) * (max - min) + min;
+    }
+
+    public static Vector circumcenter(Point a, Point b, Point c) {
+        double ad = a.x * a.x + a.y * a.y;
+        double bd = b.x * b.x + b.y * b.y;
+        double cd = c.x * c.x + c.y * c.y;
+        double D = 2 * (a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y));
+        double x = (1 / D * (ad * (b.y - c.y) + bd * (c.y - a.y) + cd * (a.y - b.y)));
+        double y = (1 / D * (ad * (c.x - b.x) + bd * (a.x - c.x) + cd * (b.x - a.x)));
+        return new Vector(x, y);
+    }
+
+    public static double distance(double x1, double y1, double x2, double y2) {
+        return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+    }
+
+    public static boolean intervalOverlap(double a1, double a2, double b1, double b2) {
+        return a1 < b2 && b1 < a2;
+    }
+
+    public static double intervalMiddle(double a1, double b1, double a2, double b2) {
+        // Return middle of intersection of two intervals
+        return (Math.max(a1, b1) + Math.min(a2, b2)) / 2;
+    }
+
+    private static double constrainRect(double x) {
+        // Restrict wave to give position on a rectangle
+        return Math.max(-1, Math.min(1, Math.sqrt(2) * x));
+    }
+
+    public static Point pointOnRect(int x, int y, int w, int h, double angle) {
+        double x1 = constrainRect(Math.cos(angle));
+        double y1 = constrainRect(Math.sin(angle));
+        double x2 = x + x1 * w / 2;
+        double y2 = y + y1 * h / 2;
+        return new Point((int) x2, (int) y2);
+    }
+
+    public static String[] listFiles(String path) {
+        return Game.getInstance().listFiles(path);
+    }
+
+    public static BufferedImage flip(BufferedImage image) {
+        AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
+        tx.translate(-image.getWidth(null), 0);
+        AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+        return op.filter(image, null);
+    }
+
+    public static void scale(Graphics2D g, double scale, double cx, double cy) {
+        double offsetX = cx * (1 - scale);
+        double offsetY = cy * (1 - scale);
+        g.scale(scale, scale);
+        g.translate(offsetX / scale, offsetY / scale);
+    }
+
+    public static void unscale(Graphics2D g, double scale, double cx, double cy) {
+        double offsetX = cx * (1 - scale);
+        double offsetY = cy * (1 - scale);
+        g.translate(-offsetX / scale, -offsetY / scale);
+        g.scale(1 / scale, 1 / scale);
     }
 }

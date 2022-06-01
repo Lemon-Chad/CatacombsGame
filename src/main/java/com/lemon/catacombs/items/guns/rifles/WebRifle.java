@@ -26,8 +26,8 @@ public class WebRifle extends Gun {
     public WebRifle() {
         super(0, 0, 0.1, 0.7, 10, 15, 0.1,
                 0.2, 30, 60);
-        lifespan = (int) Utils.range(300, 500);
-        radius = (int) Utils.range(15, 32);
+        lifespan = Utils.intRange(300, 500);
+        radius = Utils.intRange(15, 32);
     }
 
     @Override

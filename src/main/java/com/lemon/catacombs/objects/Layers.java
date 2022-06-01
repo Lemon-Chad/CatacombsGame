@@ -9,4 +9,6 @@ public class Layers {
     public static final int PROJECTILES = 5;
     public static final int ITEM = 6;
     public static final int SPLASH = 7;
+    public static final int DOORS = 8;
+    public static final int PIT = 9;
 }

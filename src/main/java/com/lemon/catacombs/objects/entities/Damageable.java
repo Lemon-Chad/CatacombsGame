@@ -8,11 +8,16 @@ abstract public class Damageable extends PhysicsObject {
     private int health;
     private int maxHealth;
     private int invincibility;
+    private boolean bleed = true;
 
     public Damageable(int x, int y, int id, int[] solids, int health) {
         super(x, y, id, solids);
         this.health = health;
         this.maxHealth = health;
+    }
+
+    public void setBleeds(boolean bleed) {
+        this.bleed = bleed;
     }
 
     public void setHealth(int health) {
@@ -55,7 +60,8 @@ abstract public class Damageable extends PhysicsObject {
             onDeath();
         }
         invincible();
-        Utils.bloodsplosion(x, y, damage, 1, 5);
+        if (bleed)
+            Utils.bloodsplosion(x, y, damage, 1, 5);
         return true;
     }
 

@@ -19,11 +19,12 @@ public class Explosion extends GameObject {
         super(x, y, ID.SplashEffect);
         addCollisionLayer(Layers.SPLASH);
         addCollisionMask(Layers.PLAYER);
+        addCollisionMask(Layers.DOORS);
         addCollisionMask(Layers.ENEMY);
         this.damage = damage;
         this.radius = radius;
         currentRadius = 1;
-        Game.getInstance().getAudioHandler().playSound("/sounds/explode" + (int) Utils.range(1, 3) + ".wav");
+        Game.getInstance().getAudioHandler().playSound("/sounds/explode" + Utils.intRange(1, 3) + ".wav");
     }
 
     /*

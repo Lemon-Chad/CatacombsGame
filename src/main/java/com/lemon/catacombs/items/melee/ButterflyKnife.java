@@ -9,8 +9,8 @@ public class ButterflyKnife extends MeleeWeapon {
     private final int damage;
 
     public ButterflyKnife() {
-        super((int) Utils.range(5, 10));
-        damage = (int) Utils.range(90, 110);
+        super(Utils.intRange(5, 10));
+        damage = Utils.intRange(90, 110);
     }
 
     @Override

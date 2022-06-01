@@ -24,8 +24,8 @@ public class ThumperRifle extends Gun {
     public ThumperRifle() {
         super(50, 80, 0.5, 0.9, 45, 75, 0.5,
                 1.5, 3, 6);
-        cookTime = (int) Utils.range(30, 60);
-        radius = (int) Utils.range(5, 15);
+        cookTime = Utils.intRange(30, 60);
+        radius = Utils.intRange(5, 15);
     }
 
     @Override

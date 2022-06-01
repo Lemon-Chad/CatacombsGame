@@ -22,6 +22,7 @@ import com.lemon.catacombs.objects.projectiles.Bullet;
 import com.lemon.catacombs.objects.projectiles.PlayerBullet;
 import com.lemon.catacombs.objects.projectiles.ThrownLeverShotgun;
 import com.lemon.catacombs.objects.projectiles.ThrownWeapon;
+import com.lemon.catacombs.objects.rooms.Pit;
 import com.lemon.catacombs.objects.ui.FadeOut;
 
 import java.awt.*;
@@ -34,6 +35,10 @@ public class Player extends Damageable {
     private boolean up = false, down = false, left = false, right = false;
 
     private boolean moving;
+    private boolean scanning;
+
+    private boolean falling;
+    private int fallTimer;
 
     private static final double JUMP_SPEED = 0.1f;
     private static final int JUMP_HEIGHT = 40;
@@ -44,6 +49,7 @@ public class Player extends Damageable {
     private int bHopDelay;
 
     private static final int MAX_SPEED = 7;
+    private static final float ACCEL = 1.5f;
     private static final float FRICTION = 0.8f;
 
     private float maxSpeed = MAX_SPEED;
@@ -68,12 +74,13 @@ public class Player extends Damageable {
     private final BlendSpace<String> directions;
 
     public Player(int x, int y) {
-        super(x, y, ID.Player, new int[]{ ID.Block }, 100);
+        super(x, y, ID.Player, new int[]{ ID.Block, ID.Door }, 100);
 
         Game.getInstance().setPlayer(this);
 
         addCollisionLayer(Layers.PLAYER);
         addCollisionMask(Layers.BLOCKS);
+        addCollisionMask(Layers.PIT);
 
         Game.onKeyPressed(KeyEvent.VK_W, event -> up = true);
         Game.onKeyPressed(KeyEvent.VK_S, event -> down = true);
@@ -93,6 +100,9 @@ public class Player extends Damageable {
         Game.onKeyPressed(KeyEvent.VK_3, event -> swapWeapons(2));
 
         Game.onKeyPressed(KeyEvent.VK_E, event -> interacting = 2);
+
+        Game.onKeyPressed(KeyEvent.VK_Q, event -> scanning = true);
+        Game.onKeyReleased(KeyEvent.VK_Q, event -> scanning = false);
 
         Game.onMouseEvent(MouseEvents.MousePressed, this::fireWeapon);
         Game.onMouseEvent(MouseEvents.MouseReleased, this::mouseReleased);
@@ -130,6 +140,13 @@ public class Player extends Damageable {
 
     @Override
     public void tick() {
+        if (falling) {
+            fallTimer++;
+            if (fallTimer >= Pit.DEPTH) {
+                destroy();
+            }
+            return;
+        }
         super.tick();
         interacting--;
         bHopDelay--;
@@ -143,33 +160,35 @@ public class Player extends Damageable {
         }
 
         // Friction
-        setVelX((float) Utils.approachZero(getVelX(), FRICTION));
-        setVelY((float) Utils.approachZero(getVelY(), FRICTION));
+        setVelX((float) Utils.approachZero(getVelX(), getFriction(FRICTION)));
+        setVelY((float) Utils.approachZero(getVelY(), getFriction(FRICTION)));
 
         if (!jumping && bHopDelay <= 0) {
-            maxSpeed = (float) Utils.approach(maxSpeed, MAX_SPEED, FRICTION);
+            maxSpeed = (float) Utils.approach(maxSpeed, MAX_SPEED, getFriction(FRICTION));
             stamina = Math.min(stamina + 1, MAX_STAMINA);
             if (bHopDelay > -10) {
-                maxSpeed = (float) Utils.approach(maxSpeed, MAX_SPEED, FRICTION * 2);
+                maxSpeed = (float) Utils.approach(maxSpeed, MAX_SPEED, getFriction(FRICTION * 2));
             }
             normalizeVelocity(maxSpeed);
         } else {
-            maxSpeed = (float) Utils.approach(maxSpeed, MAX_SPEED, FRICTION / 32);
+            maxSpeed = (float) Utils.approach(maxSpeed, MAX_SPEED, getFriction(FRICTION / 32));
         }
 
         boolean moving = getVelX() != 0 || getVelY() != 0;
         if (this.moving != moving)
             this.moving = moving;
 
-        if (up) addSpeed(0, -1.5f);
-        else if (down) addSpeed(0, 1.5f);
+        if (up) addSpeed(0, -ACCEL);
+        else if (down) addSpeed(0, ACCEL);
 
-        if (left) addSpeed(-1.5f, 0);
-        else if (right) addSpeed(1.5f, 0);
+        if (left) addSpeed(-ACCEL, 0);
+        else if (right) addSpeed(ACCEL, 0);
 
         if (equipped != null) {
             equipped.tick();
         }
+
+        if (scanning) scan();
 
         jumpTick();
     }
@@ -181,7 +200,7 @@ public class Player extends Damageable {
         currentWeapon = index;
         Weapon newWeapon = weapons[currentWeapon];
         if (newWeapon != equipped && newWeapon != null) {
-            Game.playSound(newWeapon.audioPath() + "equip" + (int) Utils.range(1, 3) + ".wav");
+            Game.playSound(newWeapon.audioPath() + "equip" + Utils.intRange(1, 3) + ".wav");
         }
         equipped = newWeapon;
     }
@@ -201,16 +220,21 @@ public class Player extends Damageable {
         setInvincibility(30);
     }
 
+    private void scan() {
+        Game.getInstance().setPhysicsSpeed(0.25f);
+    }
+
     private void startJump() {
         jumping = true;
         stamina -= 10;
 
         removeCollisionLayer(Layers.PLAYER);
+        removeCollisionMask(Layers.PIT);
     }
 
     private void jumpTick() {
         if (!jumping) return;
-        jump += JUMP_SPEED;
+        jump += JUMP_SPEED * Game.getInstance().getPhysicsSpeed();
         if (jump >= 2) {
             stopJump();
         }
@@ -221,6 +245,7 @@ public class Player extends Damageable {
         jump = 0;
         bHopDelay = 7;
         addCollisionLayer(Layers.PLAYER);
+        addCollisionMask(Layers.PIT);
     }
 
     private double getJumpArc() {
@@ -313,6 +338,20 @@ public class Player extends Damageable {
 
     @Override
     public void render(Graphics g) {
+        Graphics2D g2d = (Graphics2D) g.create();
+        float progress = 1f - (float) fallTimer / Pit.DEPTH;
+        double cx = getBounds().getCenterX(), cy = getBounds().getCenterY();
+        if (falling) {
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, progress));
+            g2d.rotate(Math.PI * 2 * progress, cx, cy);
+            Utils.scale(g2d, progress, cx, cy);
+        }
+        fallRender(g2d);
+        g2d.dispose();
+    }
+
+    private void fallRender(Graphics g) {
+        super.render(g);
         // Update animations
         String k = updateAnimations();
 
@@ -402,14 +441,14 @@ public class Player extends Damageable {
 
     @Override
     public Rectangle getBounds() {
-        return new Rectangle(x - 16, y - 16, 64, 64);
+        return new Rectangle(x - 8, y - 8, 48, 48);
     }
 
     private void fireWeapon(MouseEvent e) {
         if (e.getButton() == MouseEvent.BUTTON1) {
             if (equipped != null && !equipped.isMelee()) {
                 if (equipped.getAmmo() == 0) {
-                    Game.playSound(equipped.audioPath() + "empty" + (int) Utils.range(1, 3) + ".wav");
+                    Game.playSound(equipped.audioPath() + "empty" + Utils.intRange(1, 3) + ".wav");
                     return;
                 }
 
@@ -519,10 +558,16 @@ public class Player extends Damageable {
 
     @Override
     protected void onDeath() {
+        onDeath(true);
+    }
+
+    protected void onDeath(boolean explode) {
         Game.getInstance().setPlayer(null);
         Game.playSound("/sounds/hit/kill.wav");
-        Utils.bloodsplosion(x, y, 1500, 3, 15);
-        destroy();
+        if (explode) {
+            Utils.bloodsplosion(x, y, 1500, 3, 15);
+            destroy();
+        }
         Game.later(1000, () -> Game.getInstance().getWorld().addObject(new FadeOut(100,
                 () -> Game.getInstance().menu()
         )));
@@ -549,23 +594,47 @@ public class Player extends Damageable {
     }
 
     @Override
+    public void collision(GameObject other) {
+        super.collision(other);
+        if (other.getId() == ID.Pit && other.getBounds().contains(getBounds())) {
+            onDeath(false);
+            startFall();
+        }
+    }
+
+    public void startFall() {
+        // Remove collisions
+        removeCollisionLayer(Layers.PLAYER);
+        removeCollisionMask(Layers.BLOCKS);
+        removeCollisionMask(Layers.PIT);
+        // Stop movement
+        setVelX(0);
+        setVelY(0);
+        // Start falling
+        falling = true;
+        fallTimer = 0;
+        moving = false;
+    }
+
+    @Override
     public boolean damage(int damage) {
         super.damage(damage);
         if (getInvincibility() > 0) return false;
-        Game.playSound("/sounds/hit/hit" + (int) Utils.range(1, 3) + ".wav");
+        Game.playSound("/sounds/hit/hit" + Utils.intRange(1, 3) + ".wav");
         return true;
     }
 
-    private class Punch extends GameObject {
+    public class Punch extends GameObject {
         private final int damage;
         private final MeleeRange range;
         private final double angle;
         private int life = 2;
 
-        public Punch(int x, int y) {
+        private Punch(int x, int y) {
             super(x, y, ID.PlayerProjectile);
             addCollisionLayer(Layers.PLAYER_PROJECTILES);
             addCollisionMask(Layers.ENEMY);
+            addCollisionMask(Layers.DOORS);
             damage = (equipped == null || equipped.meleeDamage() == 0) ? 20 : equipped.meleeDamage();
             MeleeRange unshiftedRange = (equipped == null ? new MeleeRange(1, 1) : equipped.meleeRange());
             range = new MeleeRange(unshiftedRange.getWidth() * 32, unshiftedRange.getHeight() * 32);
@@ -614,11 +683,15 @@ public class Player extends Damageable {
 
         @Override
         public void collision(GameObject other) {
-            if (other.getId() == ID.Enemy) {
-                Enemy enemy = (Enemy) other;
+            if (other instanceof Damageable) {
+                Damageable enemy = (Damageable) other;
                 enemy.damage(damage, getThis());
                 Game.getInstance().getCamera().setZoom(1.1f);
             }
         }
+    }
+
+    public static double getFriction(double f) {
+        return f * Game.getInstance().getPhysicsSpeed();
     }
 }

@@ -12,7 +12,7 @@ public class MomentumEffect implements Weapon.BulletEffect {
     private final int travelFactor;
 
     public MomentumEffect() {
-        this.travelFactor = (int) Utils.range(96, 512);
+        this.travelFactor = Utils.intRange(96, 512);
     }
 
     @Override

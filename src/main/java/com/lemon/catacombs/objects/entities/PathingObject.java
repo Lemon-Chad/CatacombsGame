@@ -26,7 +26,6 @@ abstract public class PathingObject extends Damageable {
         costs = new HashMap<>();
     }
 
-
     protected void addObstacle(int id) {
         obstacles.add(id);
     }

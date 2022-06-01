@@ -24,8 +24,8 @@ public class LightningEffect implements Weapon.BulletEffect {
     private final double chainChance;
 
     public LightningEffect() {
-        radius = (int) Utils.range(32, 80);
-        damage = (int) Utils.range(5, 15);
+        radius = Utils.intRange(32, 80);
+        damage = Utils.intRange(5, 15);
         chainChance = Utils.range(0.1, 0.5);
     }
 

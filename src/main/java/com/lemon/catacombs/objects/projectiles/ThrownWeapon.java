@@ -5,6 +5,7 @@ import com.lemon.catacombs.engine.physics.GameObject;
 import com.lemon.catacombs.engine.render.Sprite;
 import com.lemon.catacombs.objects.ID;
 import com.lemon.catacombs.objects.Layers;
+import com.lemon.catacombs.objects.entities.Damageable;
 import com.lemon.catacombs.objects.entities.enemies.Enemy;
 
 import java.awt.*;
@@ -69,9 +70,10 @@ public class ThrownWeapon extends GameObject {
 
     @Override
     public void collision(GameObject other) {
-        if (other.getId() == ID.Enemy) {
-            Enemy enemy = (Enemy) other;
-            enemy.cancelLoot();
+        if (other instanceof Damageable) {
+            Damageable enemy = (Damageable) other;
+            if (enemy instanceof Enemy)
+                ((Enemy) enemy).cancelLoot();
             enemy.damage(damage == -1 ? 150 : damage, this);
             if (!breaks) return;
         }

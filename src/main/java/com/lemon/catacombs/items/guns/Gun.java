@@ -29,11 +29,11 @@ public abstract class Gun implements Weapon {
 
     public Gun(int minDMG, int maxDMG, double minBloom, double maxBloom, int minFireRate, int maxFireRate,
                double minRecoil, double maxRecoil, int minAmmo, int maxAmmo) {
-        damage = (int) Utils.range(minDMG, maxDMG);
+        damage = Utils.intRange(minDMG, maxDMG);
         bloom = Utils.range(minBloom, maxBloom);
-        fireRate = (int) Utils.range(minFireRate, maxFireRate);
+        fireRate = Utils.intRange(minFireRate, maxFireRate);
         recoil = Utils.range(minRecoil, maxRecoil);
-        ammo = (int) Utils.range(minAmmo, maxAmmo);
+        ammo = Utils.intRange(minAmmo, maxAmmo);
     }
 
     public Gun() {}
@@ -80,13 +80,13 @@ public abstract class Gun implements Weapon {
             return;
         }
         onShoot(player);
-        Game.playSound(audioPath() + "fire" + (int) Utils.range(1, 3) + ".wav");
+        Game.playSound(audioPath() + "fire" + Utils.intRange(1, 3) + ".wav");
         if (isDual()) {
-            Game.later(60, () -> Game.playSound(audioPath() + "fire" + (int) Utils.range(1, 3) + ".wav"));
+            Game.later(60, () -> Game.playSound(audioPath() + "fire" + Utils.intRange(1, 3) + ".wav"));
         }
         if (isLever()) {
             // Play sound after delay
-            Game.later(40, () -> Game.playSound(audioPath() + "lever" + (int) Utils.range(1, 3) + ".wav"));
+            Game.later(40, () -> Game.playSound(audioPath() + "lever" + Utils.intRange(1, 3) + ".wav"));
         }
         cooldown = fireRate;
         currentRecoil += recoil;

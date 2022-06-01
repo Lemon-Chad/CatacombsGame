@@ -12,6 +12,8 @@ public class EnvironmentBullet extends Bullet {
         super(x, y, ID.Projectile);
         addCollisionMask(Layers.ENEMY);
         addCollisionMask(Layers.PLAYER);
+        addCollisionMask(Layers.DOORS);
+        addCollisionMask(Layers.BLOCKS);
     }
 
     @Override
@@ -30,8 +32,7 @@ public class EnvironmentBullet extends Bullet {
         if (other instanceof Damageable) {
             Damageable damageable = (Damageable) other;
             if (damageable.damage(getDamage(), this)) {
-                setVelX(getVelX() / 2);
-                setVelY(getVelY() / 2);
+                friction(0.5f);
             }
             return;
         }

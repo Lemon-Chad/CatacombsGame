@@ -13,6 +13,7 @@ public class EnemyBullet extends Bullet {
         super(x, y, ID.EnemyProjectile);
         addCollisionMask(Layers.PLAYER);
         addCollisionLayer(Layers.ENEMY_PROJECTILES);
+        addCollisionMask(Layers.BLOCKS);
         this.size = size;
     }
 

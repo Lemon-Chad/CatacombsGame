@@ -60,6 +60,10 @@ public class PlayerHUD extends UIComponent {
         return Math.round(number / 10_000_000f) / 100f + "b";
     }
 
+    private String shorten(int number) {
+        return number < 1000 ? number + "" : shorten((double) number);
+    }
+
     private void renderInventory(Graphics g) {
         int x = 20;
         int y = 20;

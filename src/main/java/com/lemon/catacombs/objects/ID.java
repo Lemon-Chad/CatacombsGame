@@ -11,4 +11,7 @@ public class ID {
     public static final int Collectable = 8;
     public static final int EnemyProjectile = 9;
     public static final int SplashEffect = 10;
+    public static final int Pit = 11;
+    public static final int Crate = 12;
+    public static final int Door = 13;
 }

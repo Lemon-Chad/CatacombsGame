@@ -34,9 +34,11 @@ public abstract class Enemy extends PathingObject {
     private final BlendSpace<String> directions;
 
     public Enemy(int x, int y, int health) {
-        super(x, y, ID.Enemy, new int[]{ID.Block}, health);
+        super(x, y, ID.Enemy, new int[]{ ID.Block, ID.Pit }, health);
         addCollisionMask(Layers.BLOCKS);
         addCollisionMask(Layers.PLAYER);
+
+        setVisualize(true);
 
         addObstacle(Layers.BLOCKS);
         addCost(Layers.ENEMY, 64);
@@ -96,7 +98,7 @@ public abstract class Enemy extends PathingObject {
 
     @Override
     public void tick() {
-        tick(32, 32);
+        tick(32, 16);
     }
 
     protected abstract int getSize();
@@ -109,8 +111,6 @@ public abstract class Enemy extends PathingObject {
         Vector velocity = new Vector(getVelX(), getVelY()).normalize();
         directions.set((float) velocity.x, (float) velocity.y);
         animationSpace.startAnimation(directions.get());
-
-        double alpha = Math.min(1, Math.max(0, state == State.EVADE ? (15 - stateDuration) / 60.0 : 1.0));
 
         int width = getSize();
         int height = getSize();

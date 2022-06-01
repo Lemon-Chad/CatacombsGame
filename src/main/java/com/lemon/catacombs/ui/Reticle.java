@@ -47,31 +47,46 @@ public class Reticle extends UIComponent {
         int x = getX() + RETICLE_SIZE.width / 2;
         int y = getY() + RETICLE_SIZE.height / 2;
         Graphics2D g = (Graphics2D) gg.create();
-        g.setColor(Color.WHITE);
-        g.fillOval(getX(), getY(), RETICLE_SIZE.width, RETICLE_SIZE.height);
+        shadowOval(g, getX(), getY(), RETICLE_SIZE.width, RETICLE_SIZE.height, Color.WHITE);
         int alpha = (int) (255 * Math.max(0, Math.min(1, 7 - Math.abs(radius - 16) / 2)));
         if (alpha >= 0) {
-            g.setColor(new Color(255, 255, 255, alpha));
-            drawCross(g, iradius);
+            Color color = new Color(255, 255, 255, alpha);
+            drawCross(g, iradius, color);
         }
 
         if (Stats.getStats().getSinceLastHit() > 0) {
             Color color = Stats.getStats().getSinceLastKill() > 0 ? Color.RED : Color.WHITE;
             alpha = (int) (255 * Math.min(1, Stats.getStats().getSinceLastHit() / 35f));
-            g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha));
+            color = new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha);
             g.rotate(Math.PI / 4, x, y);
-            drawCross(g, HITMARKER_SIZE);
+            drawCross(g, HITMARKER_SIZE, color);
         }
 
         g.dispose();
     }
 
-    private void drawCross(Graphics g, int r) {
+    private void shadowOval(Graphics g, int x, int y, int width, int height, Color color) {
+        g.setColor(new Color(0, 0, 0, color.getAlpha() / 2));
+        g.fillOval(x + 4, y + 4, width, height);
+
+        g.setColor(color);
+        g.fillOval(x, y, width, height);
+    }
+
+    private void shadowRectangle(Graphics g, int x, int y, int width, int height, Color color) {
+        g.setColor(new Color(0, 0, 0, color.getAlpha() / 2));
+        g.fillRect(x + 4, y + 4, width, height);
+
+        g.setColor(color);
+        g.fillRect(x, y, width, height);
+    }
+
+    private void drawCross(Graphics g, int r, Color color) {
         int x = getX() + RETICLE_SIZE.width / 2;
         int y = getY() + RETICLE_SIZE.height / 2;
-        g.fillRect(x - r - CROSSHAIR_SIZE.width, y, CROSSHAIR_SIZE.width, CROSSHAIR_SIZE.height);
-        g.fillRect(x + r, y, CROSSHAIR_SIZE.width, CROSSHAIR_SIZE.height);
-        g.fillRect(x, y - r - CROSSHAIR_SIZE.width, CROSSHAIR_SIZE.height, CROSSHAIR_SIZE.width);
-        g.fillRect(x, y + r, CROSSHAIR_SIZE.height, CROSSHAIR_SIZE.width);
+        shadowRectangle(g, x - r - CROSSHAIR_SIZE.width, y, CROSSHAIR_SIZE.width, CROSSHAIR_SIZE.height, color);
+        shadowRectangle(g, x + r, y, CROSSHAIR_SIZE.width, CROSSHAIR_SIZE.height, color);
+        shadowRectangle(g, x, y - r - CROSSHAIR_SIZE.width, CROSSHAIR_SIZE.height, CROSSHAIR_SIZE.width, color);
+        shadowRectangle(g, x, y + r, CROSSHAIR_SIZE.height, CROSSHAIR_SIZE.width, color);
     }
 }

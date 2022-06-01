@@ -70,4 +70,9 @@ public class Vector {
     public Vector rotate(Vector v, double angle) {
         return sub(v).rotate(angle).add(v);
     }
+
+    @Override
+    public String toString() {
+        return "(" + x + ", " + y + ")";
+    }
 }

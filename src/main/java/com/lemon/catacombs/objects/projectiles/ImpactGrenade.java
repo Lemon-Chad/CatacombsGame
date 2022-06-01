@@ -25,6 +25,7 @@ public class ImpactGrenade extends Bullet {
         addCollisionMask(Layers.PLAYER);
         addCollisionMask(Layers.ENEMY);
         addCollisionMask(Layers.PROJECTILES);
+        addCollisionMask(Layers.BLOCKS);
     }
 
     @Override
@@ -34,8 +35,7 @@ public class ImpactGrenade extends Bullet {
         x += Math.round(getVelX());
         y += Math.round(getVelY());
 
-        setVelX(getVelX() * 0.99f);
-        setVelY(getVelY() * 0.99f);
+        friction(0.99f);
 
         cookTime--;
         if (cookTime <= 0) {
@@ -56,7 +56,7 @@ public class ImpactGrenade extends Bullet {
     @Override
     public void collision(GameObject other) {
         super.collision(other);
-        if (cooldown >= 0) {
+        if (cooldown >= 0 && other.getId() != ID.Block && other.getId() != ID.Door) {
             return;
         }
         explode();

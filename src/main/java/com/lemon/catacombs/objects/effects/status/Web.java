@@ -7,8 +7,6 @@ import com.lemon.catacombs.objects.Layers;
 import com.lemon.catacombs.objects.projectiles.Bullet;
 
 import java.awt.*;
-import java.util.HashSet;
-import java.util.Set;
 
 public class Web extends Bullet {
     private final int radius;
@@ -17,11 +15,12 @@ public class Web extends Bullet {
 
     public Web(int x, int y, int r, int life) {
         super(x, y, ID.SplashEffect);
-        this.radius = (int) Utils.range(r, r * 2);
+        this.radius = Utils.intRange(r, r * 2);
         this.r = 0;
-        this.life = (int) Utils.range(life, life * 2);
+        this.life = Utils.intRange(life, life * 2);
         addCollisionLayer(Layers.SPLASH);
         addCollisionMask(Layers.ENEMY);
+        addCollisionMask(Layers.BLOCKS);
     }
 
     @Override
@@ -39,8 +38,7 @@ public class Web extends Bullet {
         x += Math.round(getVelX());
         y += Math.round(getVelY());
 
-        setVelX(getVelX() * 0.9f);
-        setVelY(getVelY() * 0.9f);
+        friction(0.9f);
 
         if (r < radius) {
             r++;
@@ -70,6 +68,10 @@ public class Web extends Bullet {
 
     @Override
     public void collision(GameObject other) {
+        if (other.getId() == ID.Block || other.getId() == ID.Door) {
+            setVelX(0);
+            setVelY(0);
+        }
         other.addEffect(new EffectListener() {
             @Override
             public void onEffectStart(GameObject gameObject) {}

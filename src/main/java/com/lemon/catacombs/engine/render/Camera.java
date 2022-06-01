@@ -15,6 +15,7 @@ public class Camera {
         this.x = x;
         this.y = y;
         this.zoom = 1;
+        this.shake = 1;
     }
 
     public void tick(GameObject object) {

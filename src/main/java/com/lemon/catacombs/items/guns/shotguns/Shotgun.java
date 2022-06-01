@@ -14,7 +14,7 @@ public abstract class Shotgun extends Gun {
                    double minRecoil, double maxRecoil, int minAmmo, int maxAmmo, int minPellets, int maxPellets,
                    double minKnockback, double maxKnockback) {
         super(minDMG, maxDMG, minBloom, maxBloom, minFireRate, maxFireRate, minRecoil, maxRecoil, minAmmo, maxAmmo);
-        pelletCount = (int) Utils.range(minPellets, maxPellets);
+        pelletCount = Utils.intRange(minPellets, maxPellets);
         knockback = Utils.range(minKnockback, maxKnockback);
     }
 

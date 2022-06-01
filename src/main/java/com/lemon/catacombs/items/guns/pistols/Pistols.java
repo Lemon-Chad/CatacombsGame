@@ -17,7 +17,7 @@ public class Pistols extends Gun {
     * - High bullet speed
      */
     public Pistols() {
-        super(10, 20, 0.1, 0.3, 10, 25, 0.4,
+        super(20, 30, 0.1, 0.3, 10, 15, 0.4,
                 0.9, 30, 50);
     }
 

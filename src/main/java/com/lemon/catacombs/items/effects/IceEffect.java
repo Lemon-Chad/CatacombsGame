@@ -14,7 +14,7 @@ public class IceEffect implements Weapon.BulletEffect {
     private final int duration;
 
     public IceEffect() {
-        this.duration = (int) Utils.range(30, 90);
+        this.duration = Utils.intRange(30, 90);
     }
 
     @Override

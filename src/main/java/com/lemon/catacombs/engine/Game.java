@@ -7,18 +7,21 @@ import com.lemon.catacombs.engine.input.MouseInput;
 import com.lemon.catacombs.engine.physics.GameObject;
 import com.lemon.catacombs.engine.render.Camera;
 import com.lemon.catacombs.engine.render.Window;
+import com.lemon.catacombs.generation.Dungeon;
 import com.lemon.catacombs.items.Weapon;
 import com.lemon.catacombs.items.effects.*;
 import com.lemon.catacombs.items.guns.TestGun;
 import com.lemon.catacombs.items.guns.rifles.FrostbiteRifle;
-import com.lemon.catacombs.objects.Block;
+import com.lemon.catacombs.objects.rooms.Crate;
+import com.lemon.catacombs.objects.rooms.Pit;
+import com.lemon.catacombs.objects.rooms.Wall;
 import com.lemon.catacombs.objects.endless.CheckeredBackground;
 import com.lemon.catacombs.objects.endless.InfinitySpawner;
 import com.lemon.catacombs.objects.entities.Player;
 import com.lemon.catacombs.objects.entities.enemies.Vessel;
 import com.lemon.catacombs.objects.ui.FadeIn;
+import com.lemon.catacombs.objects.ui.cutscenes.opening.OpeningCutscene;
 import com.lemon.catacombs.ui.*;
-import javafx.scene.effect.Light;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,6 +29,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Set;
 
 public class Game extends Canvas implements Runnable {
@@ -48,6 +58,10 @@ public class Game extends Canvas implements Runnable {
 
     private double delta = 0.0;
 
+    private final float gameSpeed = 60;
+    private float physicsSpeed = 1f;
+    private float physicsSpeedDecay = 0.90f;
+
     private Player player;
 
     public Game() {
@@ -67,11 +81,12 @@ public class Game extends Canvas implements Runnable {
         audioHandler.playSound("/sounds/item.wav", 0);
         loader.loadImage("/sprites/guns/pistol.png");
 
-        menu();
-//        bossFight();
-//        playground();
-
         camera = new Camera(0, 0);
+
+//        menu();
+        playground();
+//        generationTest();
+//        openingCutscene();
 
         start();
     }
@@ -85,6 +100,23 @@ public class Game extends Canvas implements Runnable {
     public void showCursor() {
         Cursor cursor = Cursor.getDefaultCursor();
         setCursor(cursor);
+    }
+
+    public void openingCutscene() {
+        handler.addObject(new FadeIn(30));
+        handler.addObject(new OpeningCutscene(0));
+    }
+
+    public void generationTest() {
+        reset();
+        ui();
+        Dungeon dungeon = new Dungeon(10, 128, 8, 12);
+        dungeon.generate();
+        dungeon.build(0.15f);
+        Point playerSpawn = dungeon.getStart();
+        player = new Player(playerSpawn.x, playerSpawn.y);
+        handler.addObject(player);
+        handler.addObject(Weapon.dropWeapon(Weapon.generateShotgun(), playerSpawn.x, playerSpawn.y + 32));
     }
 
     public static int playSound(String s) {
@@ -109,8 +141,9 @@ public class Game extends Canvas implements Runnable {
 
     public void menu() {
         reset();
-        handler.addObject(new FadeIn(30));
-        handler.addObject(new CheckeredBackground());
+        camera.setX(0);
+        camera.setY(0);
+        handler.addObject(new OpeningCutscene(OpeningCutscene.end));
         handler.addObject(new MenuUI());
     }
 
@@ -157,7 +190,6 @@ public class Game extends Canvas implements Runnable {
 
             @Override
             public float interpolate(float x) {
-                System.out.println(x);
                 return 1 / (1 + (float) Math.exp(5 - 10 * x));
             }
         });
@@ -185,9 +217,9 @@ public class Game extends Canvas implements Runnable {
         ui();
         handler.addObject(new Player(0, 0));
         handler.addObject(new CheckeredBackground());
-        handler.addObject(Weapon.dropWeapon(new TestGun().addEffect(new LightningEffect()), 0, 64));
-        handler.addObject(new InfinitySpawner());
-        weaponSpawn();
+        handler.addObject(new Wall(128, 0, 16, 128));
+        Vessel vessel = new Vessel(64, 0);
+        handler.addObject(vessel);
     }
 
     private void weaponSpawn() {
@@ -229,8 +261,7 @@ public class Game extends Canvas implements Runnable {
         requestFocus();
         actionTimer = new Timer(10, new ActionListener() {
             long lastTime = System.nanoTime();
-            final double amountOfTicks = 60.0;
-            final double ns = 1_000_000_000 / amountOfTicks;
+            final double ns = 1_000_000_000 / gameSpeed;
             long timer = System.currentTimeMillis();
             long lastRender = System.currentTimeMillis();
             int frames = 0;
@@ -257,7 +288,6 @@ public class Game extends Canvas implements Runnable {
 
                 if (System.currentTimeMillis() - timer > 1_000) {
                     timer += 1_000;
-                    System.out.println("FPS: " + frames);
                     frames = 0;
                 }
             }
@@ -274,6 +304,7 @@ public class Game extends Canvas implements Runnable {
         handler.collisions();
         camera.tick(player);
         Stats.getStats().tick();
+        decayPhysicsSpeed();
     }
 
     public void render() {
@@ -289,21 +320,17 @@ public class Game extends Canvas implements Runnable {
             try {
                 g = screen.getGraphics();
 
-                g.setColor(new Color(50, 50, 50));
+                g.setColor(new Color(0, 0, 0));
                 g.fillRect(0, 0, getWidth(), getHeight());
 
                 Graphics2D g2d = (Graphics2D) g;
-                double offsetX = getWidth() * (1 - camera.getZoom()) / 2;
-                double offsetY = getHeight() * (1 - camera.getZoom()) / 2;
-                g2d.scale(camera.getZoom(), camera.getZoom());
-                g2d.translate(offsetX / camera.getZoom(), offsetY / camera.getZoom());
+                Utils.scale(g2d, camera.getZoom(), getWidth() / 2f, getHeight() / 2f);
                 g2d.translate(-camera.getX(), -camera.getY());
 
                 handler.render(g);
 
                 g2d.translate(camera.getX(), camera.getY());
-                g2d.translate(-offsetX / camera.getZoom(), -offsetY / camera.getZoom());
-                g2d.scale(1 / camera.getZoom(), 1 / camera.getZoom());
+                Utils.unscale(g2d, camera.getZoom(), getWidth() / 2f, getHeight() / 2f);
 
                 handler.renderUI(g);
 
@@ -346,7 +373,7 @@ public class Game extends Canvas implements Runnable {
                 if (red == 0 && green == 0 && blue == 255) {
                     handler.addObject(new Player(xx * 32, yy * 32));
                 } else if (red == 255 && green == 0 && blue == 0) {
-                    handler.addObject(new Block(xx * 32, yy * 32));
+                    handler.addObject(new Wall(xx * 32, yy * 32, 32, 32));
                 } else if (red == 255 && green == 255 && blue == 0) {
                     handler.addObject(new Vessel(xx * 32, yy * 32));
                 }
@@ -407,5 +434,59 @@ public class Game extends Canvas implements Runnable {
 
     public static Set<GameObject> objectsIn(Shape polygon, Set<Integer> mask) {
         return getInstance().handler.objectsIn(polygon, mask);
+    }
+
+    public float getPhysicsSpeed() {
+        return physicsSpeed;
+    }
+
+    public void setPhysicsSpeed(float physicsSpeed) {
+        this.physicsSpeed = physicsSpeed;
+    }
+
+    public void setPhysicsSpeedDecay(float physicsSpeedDecay) {
+        this.physicsSpeedDecay = physicsSpeedDecay;
+    }
+
+    public void decayPhysicsSpeed() {
+        physicsSpeed = 1 + (physicsSpeed - 1) * physicsSpeedDecay;
+    }
+
+    public String[] listFiles(String path) {
+        URL url = getClass().getResource(path);
+        if (url == null) {
+            return new String[0];
+        }
+        try {
+            Path p = Paths.get(url.toURI());
+            // Get only file names
+            return Files.list(p).map(Path::getFileName).map(Path::toString).toArray(String[]::new);
+        } catch (URISyntaxException | IOException e) {
+            e.printStackTrace();
+            return new String[0];
+        }
+    }
+
+    public static Font getFont(String path) {
+        Font font = loadFont(path);
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        ge.registerFont(font);
+        return font;
+    }
+
+    public static Font getFont(String s, int bold, int i) {
+        Font font = getFont(s);
+        return font.deriveFont(bold, i);
+    }
+
+    public static Font loadFont(String path) {
+        try {
+            InputStream is = Game.class.getResourceAsStream(path);
+            assert is != null;
+            return Font.createFont(Font.TRUETYPE_FONT, is);
+        } catch (IOException | FontFormatException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

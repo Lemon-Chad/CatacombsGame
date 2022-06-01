@@ -12,7 +12,7 @@ public class SplitEffect implements Weapon.BulletEffect {
     private final float drag;
 
     public SplitEffect() {
-        this.count = (int) Utils.range(2, 5);
+        this.count = Utils.intRange(2, 5);
         this.drag = (float) Utils.range(0.1, 0.5);
     }
 
