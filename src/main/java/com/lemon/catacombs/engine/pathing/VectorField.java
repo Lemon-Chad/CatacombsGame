@@ -1,5 +1,6 @@
 package com.lemon.catacombs.engine.pathing;
 
+import com.lemon.catacombs.Utils;
 import com.lemon.catacombs.engine.Game;
 
 import java.awt.*;
@@ -104,7 +105,7 @@ public class VectorField {
             return;
         }
         visited[x][y] = true;
-        if (Game.getInstance().getWorld().blocked(null, new Rectangle(x * tileSize, y * tileSize, tileSize, tileSize), walls)) {
+        if (Game.getInstance().getWorld().blocked(null, Utils.polyRect(x * tileSize, y * tileSize, tileSize, tileSize), walls)) {
             heatMap[x][y] = -1;
             return;
         }

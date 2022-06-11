@@ -1,8 +1,10 @@
 package com.lemon.catacombs.engine;
 
+import com.lemon.catacombs.Utils;
 import com.lemon.catacombs.engine.pathing.QuadTree;
 import com.lemon.catacombs.engine.physics.GameObject;
 import com.lemon.catacombs.engine.physics.CollisionLayer;
+import com.lemon.catacombs.engine.physics.PhysicsObject;
 import com.lemon.catacombs.engine.render.Camera;
 import com.lemon.catacombs.engine.render.UIComponent;
 import com.lemon.catacombs.engine.render.YSortable;
@@ -83,7 +85,8 @@ public class Handler {
             }
             Set<QuadTree> quadTrees = quadTreeForLayers(mask);
             for (QuadTree quadTree : quadTrees) {
-                Set<QuadTree> trees = quadTree.getTrees(object.getBounds());
+                Set<QuadTree> trees = quadTree.getTrees(PhysicsObject.getSweepBounds(object.getBounds(),
+                        object.getVelX(), object.getVelY()));
                 for (QuadTree tree : trees) {
                     for (GameObject other : tree.getObjects()) {
                         if (object != other && colliding(object, other)) {
@@ -95,7 +98,11 @@ public class Handler {
         }
     }
 
-    public boolean blocked(GameObject origin, Rectangle location, Set<Integer> collisionMask) {
+    public interface CollisionCheck {
+        boolean collides(GameObject other);
+    }
+
+    public boolean blocked(GameObject origin, Polygon location, Set<Integer> collisionMask) {
         int[] mask = new int[collisionMask.size()];
         int i = 0;
         for (int layer : collisionMask) {
@@ -107,7 +114,7 @@ public class Handler {
             Set<QuadTree> trees = quadTree.getTrees(location);
             for (QuadTree tree : trees) {
                 for (GameObject object : tree.getObjects()) {
-                    if (object != origin && colliding(object, origin)) {
+                    if (object != origin && Utils.contains(origin.getBounds(), location)) {
                         return true;
                     }
                 }

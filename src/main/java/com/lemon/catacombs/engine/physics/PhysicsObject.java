@@ -34,6 +34,14 @@ abstract public class PhysicsObject extends GameObject {
     }
 
     @Override
+    public void render(Graphics g) {
+        super.render(g);
+        Polygon poly = getSweepBounds();
+        g.setColor(Color.red);
+        g.drawPolygon(poly);
+    }
+
+    @Override
     public void collision(GameObject other) {
         if (solids.contains(other.getId())) {
             Rectangle r = getBounds();
@@ -60,13 +68,21 @@ abstract public class PhysicsObject extends GameObject {
 
     public boolean collides(GameObject other, Vector velocity, Rectangle r, Rectangle step, int dx, int dy) {
         int result = collisionCheck(other, step, velocity);
+        if (result != 0)
+            System.out.println("collisions:");
         if ((result & 1) != 0) {
+            if (getVelX() > 0) System.out.println("\tright");
+            else if (getVelX() < 0) System.out.println("\tleft");
+
             if (getVelX() > 0) x = other.getBounds().x - r.width + dx;
             else if (getVelX() < 0) x = other.getBounds().x + other.getBounds().width + dx;
             setVelX(0);
             setFVelX(0);
         }
-        if ((result & 2) != 0) {
+        else if ((result & 2) != 0) {
+            if (getVelY() > 0) System.out.println("\tdown");
+            else if (getVelY() < 0) System.out.println("\tup");
+
             if (getVelY() > 0) y = other.getBounds().y - r.height + dy;
             else if (getVelY() < 0) y = other.getBounds().y + other.getBounds().height + dy;
             setVelY(0);
@@ -89,12 +105,11 @@ abstract public class PhysicsObject extends GameObject {
         return getSweepBounds().intersects(o.getBounds());
     }
 
-    public Polygon getSweepBounds() {
-        Rectangle r = getBounds();
-        Rectangle future = new Rectangle(Math.round(r.x + getVelX()), Math.round(r.y + getVelY()), r.width, r.height);
+    public static Polygon getSweepBounds(Rectangle r, final float velX, final float velY) {
+        Rectangle future = new Rectangle(Math.round(r.x + velX), Math.round(r.y + velY), r.width, r.height);
         int[] x;
         int[] y;
-        if (getVelX() >= 0 && getVelY() >= 0) {
+        if (velX >= 0 && velY >= 0) {
             x = new int[] {
                     r.x,
                     r.x + r.width,
@@ -111,7 +126,7 @@ abstract public class PhysicsObject extends GameObject {
                     future.y + future.height,
                     r.y + r.height
             };
-        } else if (getVelX() >= 0 && getVelY() < 0) {
+        } else if (velX >= 0 && velY < 0) {
             x = new int[] {
                     r.x,
                     r.x + r.width,
@@ -128,7 +143,7 @@ abstract public class PhysicsObject extends GameObject {
                     future.y,
                     r.y
             };
-        } else if (getVelX() < 0 && getVelY() >= 0) {
+        } else if (velX < 0 && velY >= 0) {
             x = new int[] {
                     r.x + r.width,
                     r.x,
@@ -164,6 +179,10 @@ abstract public class PhysicsObject extends GameObject {
             };
         }
         return new Polygon(x, y, 6);
+    }
+
+    public Polygon getSweepBounds() {
+        return getSweepBounds(getBounds(), getVelX(), getVelY());
     }
 
     public float getFVelX() {

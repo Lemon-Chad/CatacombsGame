@@ -38,8 +38,6 @@ public abstract class Enemy extends PathingObject {
         addCollisionMask(Layers.BLOCKS);
         addCollisionMask(Layers.PLAYER);
 
-        setVisualize(true);
-
         addObstacle(Layers.BLOCKS);
         addCost(Layers.ENEMY, 64);
 
@@ -60,6 +58,8 @@ public abstract class Enemy extends PathingObject {
         directions.add(1, 0, "right");
         directions.add(0, -0.9f, "up");
         directions.add(0, 0.9f, "down");
+
+        setVisualize(true);
     }
 
     public void setState(int state, int duration) {

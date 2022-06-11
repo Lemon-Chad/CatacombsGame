@@ -1,5 +1,6 @@
 package com.lemon.catacombs.engine.pathing;
 
+import com.lemon.catacombs.Utils;
 import com.lemon.catacombs.engine.Game;
 import com.lemon.catacombs.engine.physics.CollisionLayer;
 import com.lemon.catacombs.engine.physics.GameObject;
@@ -202,14 +203,14 @@ public class QuadTree {
         return objects;
     }
 
-    public Set<QuadTree> getTrees(Rectangle rect) {
+    public Set<QuadTree> getTrees(Polygon shape) {
         Set<QuadTree> trees = new HashSet<>();
-        if (!bounds.contains(rect)) {
+        if (!Utils.contains(bounds, shape)) {
             return trees;
         }
         for (QuadTree tree : children) {
-            if (tree != null && tree.bounds.contains(rect)) {
-                trees.addAll(tree.getTrees(rect));
+            if (tree != null && Utils.contains(tree.bounds, shape)) {
+                trees.addAll(tree.getTrees(shape));
             }
         }
         if (trees.size() == 0) {

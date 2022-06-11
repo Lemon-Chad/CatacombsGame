@@ -227,4 +227,26 @@ public class Utils {
         g.translate(-offsetX / scale, -offsetY / scale);
         g.scale(1 / scale, 1 / scale);
     }
+
+    public static boolean contains(Rectangle rect, Polygon p) {
+        for (int i = 0; i < p.npoints; i++) {
+            int x = p.xpoints[i];
+            int y = p.ypoints[i];
+            if (!rect.contains(x, y)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static Polygon polyRect(Point p, Dimension d) {
+        return polyRect(p.x, p.y, d.width, d.height);
+    }
+
+    public static Polygon polyRect(int x, int y, int w, int h) {
+        int[] xpoints = { x, x, x + w, x + w };
+        int[] ypoints = { y, y + h, y + h, y };
+        return new Polygon(xpoints, ypoints, 4);
+    }
+
 }

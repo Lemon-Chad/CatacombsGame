@@ -1,7 +1,10 @@
 package com.lemon.catacombs.engine.pathing;
 
+import com.lemon.catacombs.Utils;
 import com.lemon.catacombs.engine.Game;
+import com.lemon.catacombs.engine.Vector;
 import com.lemon.catacombs.engine.physics.GameObject;
+import com.lemon.catacombs.engine.physics.PhysicsObject;
 
 import java.awt.*;
 import java.util.*;
@@ -23,7 +26,7 @@ public class Pathfinder {
     }
 
     private List<Point> findPath(GameObject pather, Rectangle start) {
-        if (blocked(pather, new Rectangle((int) goal.getX(), (int) goal.getY(), stepSize, stepSize), wallMask)) {
+        if (blocked(pather, Utils.polyRect((int) goal.getX(), (int) goal.getY(), stepSize, stepSize), wallMask)) {
             return null;
         }
 
@@ -73,11 +76,11 @@ public class Pathfinder {
     }
 
     private boolean diagonalBlock(GameObject pather, Step current, Rectangle start, int x, int y, Set<Integer> mask) {
-        if (x != 0 && blocked(pather, new Rectangle(new Point(current.location.x + x * stepSize, current.location.y), start.getSize()), mask))
+        if (x != 0 && blocked(pather, start, new Rectangle(new Point(current.location.x + x * stepSize, current.location.y), start.getSize()), mask))
             return true;
-        if (y != 0 && blocked(pather, new Rectangle(new Point(current.location.x, current.location.y + y * stepSize), start.getSize()), mask))
+        if (y != 0 && blocked(pather, Utils.polyRect(new Point(current.location.x, current.location.y + y * stepSize), start.getSize()), mask))
             return true;
-        return x != 0 && y != 0 && blocked(pather, new Rectangle(new Point(current.location.x + x * stepSize, current.location.y + y * stepSize), start.getSize()), mask);
+        return x != 0 && y != 0 && blocked(pather, Utils.polyRect(new Point(current.location.x + x * stepSize, current.location.y + y * stepSize), start.getSize()), mask);
     }
 
     private int costOf(GameObject pather, Step current, Rectangle start, int x, int y) {
@@ -92,8 +95,14 @@ public class Pathfinder {
         return cost;
     }
 
-    private boolean blocked(GameObject pather, Rectangle start, Set<Integer> mask) {
-        return Game.getInstance().getWorld().blocked(pather, start, mask);
+    private boolean blocked(GameObject pather, Polygon poly, Set<Integer> mask) {
+        return Game.getInstance().getWorld().blocked(pather, poly, mask);
+    }
+
+    private boolean blocked(GameObject pather, Rectangle start, Rectangle end, Set<Integer> mask) {
+        Vector vel = new Vector(end.getX() - start.getX(), end.getY() - start.getY());
+        return Game.getInstance().getWorld().blocked(pather, PhysicsObject.getSweepBounds(start,
+                (float) vel.x, (float) vel.y), mask);
     }
 
     public static List<Point> findPath(GameObject pather, Rectangle start, Point end, Set<Integer> wallMask, Map<Integer, Integer> costs, int maxDepth, int stepSize) {
